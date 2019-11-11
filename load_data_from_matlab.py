@@ -140,7 +140,7 @@ def load_chunked_matlab_data(dirlist, h5data_location, wellsize, numwells, subst
             images_dtst = [np.empty((wellsize[0],wellsize[1],chunklength,numpoints_new), np.uint8)]*numwells
             positions_dtst = np.empty((2,numwells),np.uint8)
             labels_dtst = np.empty((1,numpoints_new,numwells), np.uint8)
-            features_dtst=np.empty((numpoints_new,14,numwells), np.float32)
+            features_dtst=np.empty((numpoints_new,14, chunklength,numwells), np.float32)
             matlab_dtst = np.empty((1,numpoints_new,numwells),np.uint8)
             substance_dtst = np.empty((1,numwells),np.uint8)
             exclude_dtst = np.zeros((1,numwells),np.bool)
@@ -186,10 +186,11 @@ def load_chunked_matlab_data(dirlist, h5data_location, wellsize, numwells, subst
                         labels[0,new_fp+1:] = 3 # frozen
                         d_labels[0,:,iterator] = labels
                         features_temp = well_read["features_vec"]
-                        features_chunked = np.empty((numpoints_new,14), np.float32)
+                        features_chunked = np.empty((numpoints_new,14, chunklength), np.float32)
                         for ii in range(numpoints_new):
-                            features_chunked[ii,:] = np.mean(features_temp[ii:ii+chunklength,:], axis=0) # check the axis
-                        d_features[:,:,iterator] = features_chunked
+                            temp =features_temp[ii:ii+chunklength,:]
+                            features_chunked[ii,:,:] = temp.T # check the axis
+                        d_features[:,:,:,iterator] = features_chunked
                         d_matlab[0,:,iterator] = np.zeros((1,numpoints_new))
                         st_alg_fr_point = min(stupid_algo_results["after_thresh"][j,k]-1,numpoints-1)
                         st_alg_start_freezing = max(stupid_algo_results["after_thresh"][j,k]-11,0)
@@ -213,8 +214,8 @@ def encode_substances(substance):
         }.get(substance, 0)
     
 # Start from 384
-load_raw_matlab_data(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384)
+#load_raw_matlab_data(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384)
 #load_raw_matlab_data(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96)
 #load_chunked_matlab_data(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 6)
-#load_chunked_matlab_data(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6)
+load_chunked_matlab_data(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6)
 
