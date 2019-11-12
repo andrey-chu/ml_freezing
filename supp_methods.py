@@ -75,6 +75,11 @@ def random_divide_sample_chunks(number_of_chunks, prop_training, prop_cv, prop_t
     """
     The function randomly divides chunks between train, cv and test
     returns tuple of three bool arrays
+    This function gives more flexible division into sets, but it could happen, 
+    that it will divide in such a way so in training will be no freezing points,
+    so not recommended.
+    Note difference from the other function, it uses all the given chunks, so 
+    the "exclusion" has to be performed before
     """
     import numpy as np
     import random
@@ -93,7 +98,7 @@ def random_divide_sample_chunks(number_of_chunks, prop_training, prop_cv, prop_t
     cv_set[:,cv_chunks]=True
     test_set[:,test_chunks]=True
     return (training_set, cv_set, test_set)
-def random_divide_samples(support, exclude, percent_training, percent_cv, percent_test):
+def random_divide_samples(support, exclude, prop_training, prop_cv):
     import numpy as np
     import random
     """
@@ -101,9 +106,9 @@ def random_divide_samples(support, exclude, percent_training, percent_cv, percen
     returns tuple of 6 bool arrays, three for chunks, three for wells
     """
     included_number_chunks= int(np.sum(support.flatten()))
-    training_set = np.zeros((1,included_number_chunks), dtype=np.bool_)
-    cv_set = np.zeros((1,included_number_chunks), dtype=np.bool_)
-    test_set = np.zeros((1,included_number_chunks), dtype=np.bool_)
+    training_set_wells = np.zeros((1,exclude.shape[1]), dtype=np.bool_)
+    cv_set_wells = np.zeros((1,exclude.shape[1]), dtype=np.bool_)
+    test_set_wells = np.zeros((1,exclude.shape[1]), dtype=np.bool_)
     included_number_wells = np.sum(np.logical_not(exclude))
     wells =  np.where(np.logical_not(exclude))[1]
     np.random.shuffle(wells)
@@ -113,7 +118,20 @@ def random_divide_samples(support, exclude, percent_training, percent_cv, percen
     training_wells = wells[:training_num]
     cv_wells = wells[training_num:training_num+cv_num]
     test_wells = wells[training_num+cv_num:]
-    
+    well_support_training=well_support.copy()
+    well_support_training[:,training_wells]=1
+    well_support_cv=well_support.copy()
+    well_support_cv[:,cv_wells]=1
+    well_support_test=well_support.copy()
+    well_support_test[:,test_wells]=1
+    well_support_training=(well_support_training*support).reshape(1,-1).T
+    well_support_cv=(well_support_cv*support).reshape(1,-1).T
+    well_support_test=(well_support_test*support).reshape(1,-1).T
+    training_set_wells[training_wells]=1
+    cv_set_wells[cv_wells]=1
+    test_set_wells[test_wells]=1
+    return (well_support_training, well_support_cv, well_support_test,\
+            training_set_wells,cv_set_wells,test_set_wells)
 def confusion_matrix_mine(estimated_labels, gt_labels, labels):
     import numpy as np
     matrix1 = np.zeros((len(labels),len(labels)))

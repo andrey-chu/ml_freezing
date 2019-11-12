@@ -41,6 +41,6 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     included_number_chunks= int(np.sum(support.flatten()))
     metric1=supp_methods.calc_eval_metric(matlab_1col_included, labels_1col_included, True, dataset_lb_shape)
     metric2 = supp_methods.calc_add_metric(matlab, labels, exclude)
-    (a,b,c) = supp_methods.random_divide_sample_chunks(included_number_chunks, 0.6,0.2,0.2)
-    (d,e,f) = supp_methods.random_divide_samples(support, exclude, 0.6,0.2,0.2)
+    #(a,b,c) = supp_methods.random_divide_sample_chunks(included_number_chunks, 0.6,0.2,0.2)
+    (d,e,f,_,_,_) = supp_methods.random_divide_samples(support, exclude, 0.6,0.2)
     
