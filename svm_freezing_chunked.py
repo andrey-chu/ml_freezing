@@ -27,9 +27,20 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     dataset_lb_shape = d_labels.shape
     labels = d_labels[:]
     matlab = d_matlab[:]
+    total_number_wells = d_images.shape[0]
+    
     support = supp_methods.create_2d_support(shapes, exclude, labels.shape)
-    support_1col = support.flatten()
-    d_labels_1col = labels.flatten()
-    d_matlab_1col = matlab.flatten()
-    d_labels_1col_included = d_labels_1col(np.nonzero(support_1col)[1])
-    metric1=supp_methods.calc_eval_metric(d_matlab_1col, d_labels_1col, True, dataset_lb_shape)
+    total_number_chunks = support.shape[0]*support.shape[1]
+    support_1col = support.reshape(1,-1).T
+    labels_1col = labels.reshape(1,-1).T
+    matlab_1col = matlab.reshape(1,-1).T
+    included_ind_1_col=np.nonzero(support_1col)
+    labels_1col_included = labels_1col[included_ind_1_col[0],:]
+    matlab_1col_included = matlab_1col[included_ind_1_col[0],:]
+    included_number_wells = np.sum(np.logical_not(exclude))
+    included_number_chunks= int(np.sum(support.flatten()))
+    metric1=supp_methods.calc_eval_metric(matlab_1col_included, labels_1col_included, True, dataset_lb_shape)
+    metric2 = supp_methods.calc_add_metric(matlab, labels, exclude)
+    (a,b,c) = supp_methods.random_divide_sample_chunks(included_number_chunks, 0.6,0.2,0.2)
+    (d,e,f) = supp_methods.random_divide_samples(support, exclude, 0.6,0.2,0.2)
+    
