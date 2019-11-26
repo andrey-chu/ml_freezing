@@ -17,7 +17,7 @@ def calc_eval_metric(estimated_labels, gt_labels, printinfo, original_shape):
     labels=np.union1d(np.unique(gt_labels),np.unique(estimated_labels))
     # confusion matrix
     confusion_matrix_skl=skl_met.confusion_matrix(estimated_labels, gt_labels)
-    confusion_matrix_mine1 = confusion_matrix_mine(estimated_labels,gt_labels, labels)
+    #confusion_matrix_mine1 = confusion_matrix_mine(estimated_labels,gt_labels, labels)
     # classification report
     class_report_dict = skl_met.classification_report(estimated_labels, gt_labels,labels\
                                                       , output_dict=True)
@@ -26,7 +26,7 @@ def calc_eval_metric(estimated_labels, gt_labels, printinfo, original_shape):
     F1_calc = class_report_dict["weighted avg"]["f1-score"]
     if printinfo:
         print(confusion_matrix_skl)
-        print(confusion_matrix_mine1)
+     #   print(confusion_matrix_mine1)
     
     return (precision_calc, recall_calc, F1_calc)
 def calc_add_metric(estimated_mat, gt_mat, exclude):
@@ -82,7 +82,7 @@ def random_divide_sample_chunks(number_of_chunks, prop_training, prop_cv, prop_t
     the "exclusion" has to be performed before
     """
     import numpy as np
-    import random
+    #import random
     training_set = np.zeros((1,number_of_chunks), dtype=np.bool_)
     cv_set = np.zeros((1,number_of_chunks), dtype=np.bool_)
     test_set = np.zeros((1,number_of_chunks), dtype=np.bool_)
@@ -100,12 +100,12 @@ def random_divide_sample_chunks(number_of_chunks, prop_training, prop_cv, prop_t
     return (training_set, cv_set, test_set)
 def random_divide_samples(support, exclude, prop_training, prop_cv):
     import numpy as np
-    import random
+    #import random
     """
     The function randomly divides wells between train, cv and test
     returns tuple of 6 bool arrays, three for chunks, three for wells
     """
-    included_number_chunks= int(np.sum(support.flatten()))
+    #included_number_chunks= int(np.sum(support.flatten()))
     training_set_wells = np.zeros((1,exclude.shape[1]), dtype=np.bool_)
     cv_set_wells = np.zeros((1,exclude.shape[1]), dtype=np.bool_)
     test_set_wells = np.zeros((1,exclude.shape[1]), dtype=np.bool_)
@@ -127,9 +127,9 @@ def random_divide_samples(support, exclude, prop_training, prop_cv):
     well_support_training=(well_support_training*support).reshape(1,-1).T
     well_support_cv=(well_support_cv*support).reshape(1,-1).T
     well_support_test=(well_support_test*support).reshape(1,-1).T
-    training_set_wells[training_wells]=1
-    cv_set_wells[cv_wells]=1
-    test_set_wells[test_wells]=1
+    training_set_wells[0,training_wells]=1
+    cv_set_wells[0,cv_wells]=1
+    test_set_wells[0,test_wells]=1
     return (well_support_training, well_support_cv, well_support_test,\
             training_set_wells,cv_set_wells,test_set_wells)
 def confusion_matrix_mine(estimated_labels, gt_labels, labels):
@@ -151,4 +151,58 @@ def create_2d_support(shapes, excludes, shape_2d):
         shapes_to_support[int(shapes[i,2]):, i] = 0
     support = support*shapes_to_support
     return support
+
+def transform_back(total_shape, positions_2d, labels):
+    import numpy as np
+    new_support = np.empty(total_shape)
+    new_support.fill(np.nan)
+    new_support[positions_2d] = labels
+    return new_support
     
+def find_freezing_by_frozen(predicted_array, wells_set):
+    import numpy as np
+    if (wells_set.ndim == 1):
+        wells_set_list = wells_set
+    elif (wells_set.ndim == 2):
+        wells_set_list = np.nonzero(wells_set)[1]
+    freezing_points = np.zeros((1,len(wells_set_list)))
+    length_array = predicted_array.shape[0]
+    ii = 0
+    for i in wells_set_list:
+        
+        array_i=predicted_array[:,i]
+        reversed_array = array_i[::-1]
+        if np.sum(array_i==1)==0:
+            itera = 0
+            j = reversed_array[itera]
+            if np.sum(reversed_array==2)==0:
+                
+                while (j==3 or (np.isnan(j))):
+                    itera +=1
+                    j=reversed_array[itera]
+            else:
+                while (j!=2):
+                    itera +=1
+                    j=reversed_array[itera]
+            #reversed_array[itera] =1
+            predicted_array[-itera,i] =1
+            freezing_points[0,ii] = length_array-itera
+        else:
+            freezing_points[0,ii] = np.min(np.nonzero(array_i==1)[0])
+        ii+=1
+    return (freezing_points, predicted_array)
+        
+def freezing_est_statistic(labels_mat, wells):
+    # wells in columns
+    import numpy as np
+    labels_short_mat = labels_mat[:,np.nonzero(wells)[1]]
+    # What if there are two ones in one column, we have to find a way to find a first(?) one
+    return np.argmax(labels_short_mat==1, axis=0)
+def freezing_metrics(freezepoints, freezepoints_gt, thresh):
+    #thresh is a threshold where freezing points regarded to be the same
+    import numpy as np
+    difference = (freezepoints - freezepoints_gt)
+    errs = np.abs(difference)<thresh
+    err = np.mean(errs)
+    mean_dist = np.mean(np.abs(difference))
+    return (err, mean_dist, errs)
