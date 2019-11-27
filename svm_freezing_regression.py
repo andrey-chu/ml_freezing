@@ -26,7 +26,7 @@ from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import learning_curve
 
 datadir = "/data/Freezing_samples/h5data/"
-chunked_united_dataset = datadir + "united_chunked_dataset_96.hdf5"
+united_dataset = datadir + "united_raw_dataset_96.hdf5"
 
 with h5py.File(chunked_united_dataset, 'r') as f:
     d_images = f["Raw_data/images_dataset"]
@@ -131,6 +131,24 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     Y_flattened=Y_all_wout_1.flatten()
     train_sizes, train_scores, test_scores = learning_curve(clf3, X_all_conc, Y_flattened,\
                                                             cv=10, n_jobs=6)#, train_sizes=train_sizes
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.figure()
+    plt.title('Pup')
+    plt.grid()
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.1,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label="Cross-validation score")
+
+    plt.legend(loc="best")
     clf3.fit(X_all_conc, Y_all_wout_1.flatten())
 #    clf4.fit(X_all_conc, Y_all.flatten())
 #    Predicted_test1 = clf1.predict(X_test_conc)

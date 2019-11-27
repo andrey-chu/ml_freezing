@@ -8,8 +8,8 @@ This module loads the needed data from matlab files and saves them in h5py forma
 """
 data_384_dirlist = ['/data/Freezing_samples/Test384Bakterie_1/','/data/Freezing_samples/Test384Vand_1/']
 data_96_dirlist = ['/data/Freezing_samples/Test96Bakterie_1/', '/data/Freezing_samples/Test96Bakterie_2/', '/data/Freezing_samples/Test96Vand_1/']
-h5data_location384 = '/data/Freezing_samples/h5data/'
-h5data_location96 = '/data/Freezing_samples/h5data/'
+h5data_location384 = '/data/Freezing_samples/h5data_new/'
+h5data_location96 = '/data/Freezing_samples/h5data_new/'
 substances384 = ['bact', 'water']
 substances96 = ['bact', 'bact', 'water']
 wellsize384 = [52, 52]
@@ -49,8 +49,9 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
          # since h5py now has this fantastic option of virtual datasets what we
          # are going to do is to create a dataset for each sample and then unite
          # them in a virtual dataset
-         with h5py.File(h5data_location+str(i)+'_raw_dataset_'+str(numwells)+substances[i]+str(i)+'.hdf5', 'w') as f:
-            print('Saving into:'+h5data_location+str(i)+'_raw_dataset_'+str(numwells)+substances[i]+str(i)+'.hdf5')
+         filename=h5data_location+str(i)+'_raw_dataset_'+str(numwells)+substances[i]+str(i)+'freez'+str(freezing_length)+'.hdf5'
+         with h5py.File(filename, 'w') as f:
+            print('Saving into:'+filename)
             g1 = f.create_group('Raw_data')
 #            wells_list =[{'images':np.empty((wellsize[0],wellsize[1],len(temps)), np.uint8),'temps': temperatures, 
 #                           'position': np.empty((2,len(temps)),np.uint8), 'labels': np.empty((1,len(temps)), np.uint8), 
@@ -64,14 +65,14 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
             substance_dtst = np.empty((1,numwells),np.uint8)
             exclude_dtst = np.zeros((1,numwells),np.bool)
             comments_dtst = ['']*numwells
-            d_images = g1.create_dataset('images_dataset', data=images_dtst)
-            d_position = g1.create_dataset('positions_dataset', data=positions_dtst)
-            g1.create_dataset('temperatures_dataset', data=temperatures)
-            d_labels = g1.create_dataset('labels_dataset', data=labels_dtst)
-            d_features = g1.create_dataset('features_dataset', data=features_dtst)
-            d_matlab = g1.create_dataset('matlab_dataset', data=matlab_dtst)
-            d_substance = g1.create_dataset('substance_dataset', data=substance_dtst)
-            d_exclude = g1.create_dataset('exclude_dataset', data=exclude_dtst)
+            d_images = g1.create_dataset('images_dataset', compression="lzf", data=images_dtst)
+            d_position = g1.create_dataset('positions_dataset', compression="lzf", data=positions_dtst)
+            g1.create_dataset('temperatures_dataset', compression="lzf", data=temperatures)
+            d_labels = g1.create_dataset('labels_dataset', compression="lzf", data=labels_dtst)
+            d_features = g1.create_dataset('features_dataset', compression="lzf", data=features_dtst)
+            d_matlab = g1.create_dataset('matlab_dataset', compression="lzf", data=matlab_dtst)
+            d_substance = g1.create_dataset('substance_dataset', compression="lzf", data=substance_dtst)
+            d_exclude = g1.create_dataset('exclude_dataset', compression="lzf", data=exclude_dtst)
             g1.attrs['Comments']=comments_dtst
             iterator = 0
             for j in range(well_rows):
@@ -106,7 +107,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
                     
                     iterator+=1
-def load_chunked_matlab_data(dirlist, h5data_location, wellsize, numwells, substances, chunklength):
+def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, chunklength, freezing_length=11):
     # new length is length- (chunklength-1)
     for i in range(len(dirlist)):
          freezing_points=spio.loadmat(dirlist[i]+'freezing_points.mat')
@@ -131,8 +132,9 @@ def load_chunked_matlab_data(dirlist, h5data_location, wellsize, numwells, subst
          # since h5py now has this fantastic option of virtual datasets what we
          # are going to do is to create a dataset for each sample and then unite
          # them in a virtual dataset
-         with h5py.File(h5data_location+str(i)+'_chunked_dataset_'+str(numwells)+substances[i]+str(i)+'.hdf5', 'w') as f:
-            print('Saving into:'+h5data_location+str(i)+'_chunked_dataset_'+str(numwells)+substances[i]+str(i)+'.hdf5')
+         filename=h5data_location+str(i)+'_chunked_dataset_'+str(numwells)+substances[i]+str(i)+'freez'+str(freezing_length)+'.hdf5'
+         with h5py.File(filename, 'w') as f:
+            print('Saving into:'+filename)
             g1 = f.create_group('Raw_data')
 #            wells_list =[{'images':np.empty((wellsize[0],wellsize[1],len(temps)), np.uint8),'temps': temperatures, 
 #                           'position': np.empty((2,len(temps)),np.uint8), 'labels': np.empty((1,len(temps)), np.uint8), 
@@ -146,14 +148,14 @@ def load_chunked_matlab_data(dirlist, h5data_location, wellsize, numwells, subst
             substance_dtst = np.empty((1,numwells),np.uint8)
             exclude_dtst = np.zeros((1,numwells),np.bool)
             comments_dtst = ['']*numwells
-            d_images = g1.create_dataset('images_dataset', data=images_dtst)
-            d_position = g1.create_dataset('positions_dataset', data=positions_dtst)
-            g1.create_dataset('temperatures_dataset', data=new_temperatures)
-            d_labels = g1.create_dataset('labels_dataset', data=labels_dtst)
-            d_features = g1.create_dataset('features_dataset', data=features_dtst)
-            d_matlab = g1.create_dataset('matlab_dataset', data=matlab_dtst)
-            d_substance = g1.create_dataset('substance_dataset', data=substance_dtst)
-            d_exclude = g1.create_dataset('exclude_dataset', data=exclude_dtst)
+            d_images = g1.create_dataset('images_dataset', compression="lzf", data=images_dtst)
+            d_position = g1.create_dataset('positions_dataset', compression="lzf", data=positions_dtst)
+            g1.create_dataset('temperatures_dataset', compression="lzf", data=new_temperatures)
+            d_labels = g1.create_dataset('labels_dataset', compression="lzf", data=labels_dtst)
+            d_features = g1.create_dataset('features_dataset', compression="lzf", data=features_dtst)
+            d_matlab = g1.create_dataset('matlab_dataset', compression="lzf", data=matlab_dtst)
+            d_substance = g1.create_dataset('substance_dataset', compression="lzf", data=substance_dtst)
+            d_exclude = g1.create_dataset('exclude_dataset', compression="lzf", data=exclude_dtst)
             g1.attrs['Comments']=comments_dtst
             iterator = 0
             for j in range(well_rows):
@@ -215,8 +217,8 @@ def encode_substances(substance):
         }.get(substance, 0)
     
 # Start from 384
-#load_raw_matlab_data(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384)
-#load_raw_matlab_data(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96)
-#load_chunked_matlab_data(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 6)
-load_chunked_matlab_data(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6)
+load_raw_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 31)
+load_raw_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 31)
+load_chunked_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 6, 31)
+load_chunked_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6, 31)
 
