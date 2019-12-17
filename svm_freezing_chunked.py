@@ -24,8 +24,8 @@ from sklearn.ensemble import BaggingClassifier
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import learning_curve
+from branch_init import datadir
 
-datadir = "/data/Freezing_samples/h5data_new/"
 chunked_united_dataset = datadir + "united_chunked_dataset_96freez31.hdf5"
 
 with h5py.File(chunked_united_dataset, 'r') as f:
