@@ -74,6 +74,7 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
         layout_substance=h5py.VirtualLayout(shape=(1,totalwells), dtype="u1")
         layout_exclude=h5py.VirtualLayout(shape=(1,totalwells), dtype=np.bool)
         iter1 = 0
+        datasets_dtst = np.zeros((0,))
         for i in range(len(list_to_unite)):
             currentwells=int(shape_tmp[i, 0])
             currentpoints=int(shape_tmp[i, -1])
@@ -112,6 +113,8 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
                                                   shape=(1, currentwells))
             layout_exclude[0,int(iter1):int(currentwells+iter1)] = vsource_exclude
             iter1 +=shape_tmp[i, 0]
+            add_to_datasets = np.ones((int(shape_tmp[i, 0]),))*i
+            datasets_dtst = np.concatenate((datasets_dtst, add_to_datasets))
         f1.create_virtual_dataset("Raw_data/images_dataset", layout_images, fillvalue=-5)
         f1.create_virtual_dataset("Raw_data/position_dataset", layout_position, fillvalue=-5)
         #next line is problematic check fillvalue
@@ -121,11 +124,12 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
         f1.create_virtual_dataset("Raw_data/matlab_dataset", layout_matlab, fillvalue=100)
         f1.create_virtual_dataset("Raw_data/substance_dataset", layout_substance, fillvalue=-5)
         f1.create_virtual_dataset("Raw_data/exclude_dataset", layout_exclude, fillvalue=-5)
-hd5py_dir = "/data/Freezing_samples/h5data/"
-unite_datasets([hd5py_dir+'0_chunked_dataset_384bact0.hdf5', hd5py_dir+'1_chunked_dataset_384water1.hdf5'], hd5py_dir+'united_chunked_dataset_384.hdf5', 'chunked')
-unite_datasets([hd5py_dir+'0_chunked_dataset_96bact0.hdf5', hd5py_dir+'1_chunked_dataset_96bact1.hdf5', hd5py_dir+'2_chunked_dataset_96water2.hdf5'], hd5py_dir+'united_chunked_dataset_96.hdf5', 'chunked')
-unite_datasets([hd5py_dir+'0_raw_dataset_384bact0.hdf5', hd5py_dir+'1_raw_dataset_384water1.hdf5'], hd5py_dir+'united_raw_dataset_384.hdf5', 'raw')
-unite_datasets([hd5py_dir+'0_raw_dataset_96bact0.hdf5', hd5py_dir+'1_raw_dataset_96bact1.hdf5', hd5py_dir+'2_raw_dataset_96water2.hdf5'], hd5py_dir+'united_raw_dataset_96.hdf5', 'raw')
+        f1.create_dataset("Raw_data/datasets_dataset", compression="lzf", data=datasets_dtst)
+hd5py_dir = "/data/Freezing_samples/h5data_new/"
+#unite_datasets([hd5py_dir+'0_chunked_dataset_384bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_384water1freez31.hdf5'], hd5py_dir+'united_chunked_dataset_384freez31.hdf5', 'chunked')
+#unite_datasets([hd5py_dir+'0_chunked_dataset_96bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_96bact1freez31.hdf5', hd5py_dir+'2_chunked_dataset_96water2freez31.hdf5'], hd5py_dir+'united_chunked_dataset_96freez31.hdf5', 'chunked')
+unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31.hdf5'], hd5py_dir+'united_raw_dataset_384freez31.hdf5', 'raw')
+unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31.hdf5'], hd5py_dir+'united_raw_dataset_96freez31.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_chunked_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384.hdf5', 'chunked')
 #unite_datasets(['/data/Freezing_samples/h5data/0_raw_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_raw_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384_test-raw.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5'], '/data/Freezing_samples/h5data/united_dat.hdf5', 'chunked')
