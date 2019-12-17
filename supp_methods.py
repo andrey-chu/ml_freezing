@@ -147,8 +147,9 @@ def create_2d_support(shapes, excludes, shape_2d):
     support = np.ones(shape_2d)
     support[:,np.nonzero(excludes)[1]] = False
     shapes_to_support = np.ones(shape_2d)
+    maxdim=len(shapes.shape)-1
     for i in range(shape_2d[1]):
-        shapes_to_support[int(shapes[i,2]):, i] = 0
+        shapes_to_support[int(shapes[i,maxdim]):, i] = 0
     support = support*shapes_to_support
     return support
 

@@ -95,6 +95,10 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         st_f = max(freezing_points["freeze_num"][j,k]-freezing_length, 0)
                         labels[0,fp] = 1
                         labels[0,st_f:fp] = 2
+                        
+
+                        labels[0,fp+1:] = 3 # frozen
+                        
                         d_labels[0,:,iterator] = labels
                         features = well_read["features_vec"]
                         d_features[:,:,iterator] = features
@@ -219,6 +223,6 @@ def encode_substances(substance):
 # Start from 384
 load_raw_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 31)
 load_raw_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 31)
-load_chunked_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 6, 31)
-load_chunked_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6, 31)
+#load_chunked_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 6, 31)
+#load_chunked_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6, 31)
 
