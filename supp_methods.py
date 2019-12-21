@@ -153,6 +153,20 @@ def create_2d_support(shapes, excludes, shape_2d):
     support = support*shapes_to_support
     return support
 
+def create_2d_support_chunked(shapes, excludes, shape_2d):
+    import numpy as np
+    # first let's check that the dimensions are right
+    assert(shape_2d[1]==shapes.shape[0])&(excludes.shape[1]==shape_2d[1])
+    support = np.ones(shape_2d)
+    support[:,np.nonzero(excludes)[1]] = False
+    shapes_to_support = np.ones(shape_2d)
+    maxdim=shapes.shape[1]-1
+    for i in range(shape_2d[1]):
+        shapes_to_support[int(shapes[i,maxdim]):, i] = 0
+    support = support*shapes_to_support
+    return support
+
+
 def transform_back(total_shape, positions_2d, labels):
     import numpy as np
     new_support = np.empty(total_shape)
