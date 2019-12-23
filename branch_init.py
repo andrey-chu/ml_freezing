@@ -7,3 +7,4 @@ Created on Tue Dec 17 14:58:58 2019
 """
 
 datadir = "/data/Freezing_samples/h5data_new/"
+datadir_old = "/data/Freezing_samples/h5data/"
