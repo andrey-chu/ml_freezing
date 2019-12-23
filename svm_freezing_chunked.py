@@ -43,7 +43,7 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     matlab = d_matlab[:]
     total_number_wells = d_images.shape[0]
     
-    support = supp_methods.create_2d_support(shapes, exclude, labels.shape)
+    support = supp_methods.create_2d_support_chunked(shapes, exclude, labels.shape)
     total_number_chunks = support.shape[0]*support.shape[1]
     support_1col = support.reshape(1,-1).T
     labels_1col = labels.reshape(1,-1).T
@@ -182,9 +182,9 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     matlab_fr = supp_methods.freezing_est_statistic(Matlab1, test_set_wells)
 #    (err1, mean_dist1, _)=supp_methods.freezing_metrics(pr1_fr,gt_fr, 10)
 #    (err2, mean_dist2, _)=supp_methods.freezing_metrics(pr2_fr,gt_fr, 10)
-    (err3, mean_dist3, _)=supp_methods.freezing_metrics(pr3_fr,gt_fr, 10)
+    (err3, mean_dist3, _)=supp_methods.freezing_metrics(pr3_fr,gt_fr, 5)
     (err3_tr, mean_dist3_tr, _)=supp_methods.freezing_metrics(pr3_tr_fr,gt_tr_fr, 10)
 #    (err4, mean_dist4, _)=supp_methods.freezing_metrics(pr4_fr,gt_fr, 10)
-    (err_mat, mean_dist_mat, _)=supp_methods.freezing_metrics(matlab_fr,gt_fr, 10)
+    (err_mat, mean_dist_mat, _)=supp_methods.freezing_metrics(matlab_fr,gt_fr, 5)
     None
     
