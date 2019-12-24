@@ -24,7 +24,11 @@ from sklearn.ensemble import BaggingClassifier
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import RepeatedKFold
 from sklearn.model_selection import learning_curve
-from branch_init import datadir
+import platform
+if platform.node()=='choo-desktop':
+    from branch_init_choo import datadir
+elif platform.node()=='andrey-cfin':
+    from branch_init_cfin import datadir
 from sklearn.model_selection import train_test_split, cross_validate
 
 chunked_united_dataset = datadir + "united_chunked_dataset_96freez31.hdf5"
@@ -87,15 +91,11 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     y_train_wout_1[y_train_wout_1==1]=2
     y_test_wout_1 = y_test1.copy()
     y_test_wout_1[y_test_wout_1==1]=2
-    # until here
-    # features_data_training = features_data_training[training_data_2d[0],:,:,training_data_2d[1]]
-    # features_data_cv = d_features[:]
-    # features_data_cv = features_data_cv[cv_data_2d[0],:,:,cv_data_2d[1]]
-    # features_data_test = d_features[:]
-    # features_data_test = features_data_test[test_data_2d[0],:,:,test_data_2d[1]]
-    # X = features_data_training.reshape(features_data_training.shape[0],-1)
-    #conc_feat = [2,3,5, 6,7,13]#3,4,6
-    C_chosen = 12.915#77.42#grid1.best_params_["C"]
+
+
+    
+    
+    C_chosen = 77.42#12.915#77.42#grid1.best_params_["C"]
     gamma_chosen = 0.05994#grid1.best_params_["gamma"]
     n_estimators = 20
     clf3 = OneVsRestClassifier(BaggingClassifier(SVC(kernel='rbf', gamma=gamma_chosen, C=C_chosen, probability=True, class_weight='balanced'), max_samples=1.0 / n_estimators, warm_start=True, n_estimators=n_estimators, n_jobs=6, verbose=10))
@@ -104,132 +104,111 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     X_train_sc_100 = X_train_sc[mask100,:]
     y_train_wout_100 = y_train_wout_1[mask100]
     
+    matlab_train_wout1 = matlab_train1.copy()
+    matlab_train_wout1[matlab_train_wout1==1]=2
+    matlab_test_wout1 = matlab_test1.copy()
+    matlab_test_wout1[matlab_test_wout1==1]=2
+    
+    matlab_test_nan = np.float_(matlab_test_wout1.copy())
+    matlab_test_nan[matlab_test_wout1==100]=np.nan
+
+    matlab_train_nan = np.float_(matlab_train_wout1.copy())
+    matlab_train_nan[matlab_train_wout1==100]=np.nan
+    
+    
     test_mask100 = y_test_wout_1!=100
     y_test_wout100 = y_test_wout_1[test_mask100]
     X_test_sc_100 = X_test_sc[test_mask100,:]
+    ## CV
+    # C_range = np.logspace(-2, 5, 10)
+    # gamma_range = np.logspace(-4, 1, 10)
+    # param_grid = dict(gamma=gamma_range, C=C_range)
+    # cv = StratifiedShuffleSplit(n_splits=10, train_size=0.01, test_size=0.2, random_state=42)
+    # grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv,n_jobs=6, verbose=10)
+    # grid.fit(X_train_sc_100, y_train_wout_100)
+
+    # print("The best parameters are %s with a score of %0.2f"
+    #   % (grid.best_params_, grid.best_score_))
+    ## end of CV
+    
+    
+    # Learning curve
+    train_sizes, train_scores, test_scores = learning_curve(clf3, X_train_sc_100, y_train_wout_100,\
+                                                            cv=10, n_jobs=6, verbose=10)#, train_sizes=train_sizes
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.figure()
+    plt.title('learning curve')
+    plt.grid()
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                    train_scores_mean + train_scores_std, alpha=0.1,
+                    color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                    test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+            label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+            label="Cross-validation score")
+
+    plt.legend(loc="best")
+    
+    
+    # everything is ready, let's fit
     clf3.fit(X_train_sc_100, y_train_wout_100)
     Predicted_test3 = clf3.predict(X_test_sc_100)
     Predicted_train3 = clf3.predict(X_train_sc_100)
     
     ## now let's add the nans and reshape back
+    test_predicted = np.empty(test_mask100.shape)
+    test_predicted[test_mask100]=Predicted_test3
+    test_predicted[np.logical_not(test_mask100)]=np.nan
+    test_predicted_reshaped = np.reshape(test_predicted, y_test.shape)
     
+    train_predicted = np.empty(mask100.shape)
+    train_predicted[mask100]=Predicted_train3
+    train_predicted[np.logical_not(mask100)]=np.nan
+    train_predicted_reshaped = np.reshape(train_predicted, y_train.shape)
     
+    GT = np.empty(test_mask100.shape)
+    GT[test_mask100]=y_test_wout100
+    GT[np.logical_not(test_mask100)]=np.nan
+    GT_reshaped=np.reshape(GT, y_test.shape)
+
+    GT_tr = np.empty(mask100.shape)
+    GT_tr[mask100]=y_train_wout_100
+    GT_tr[np.logical_not(mask100)]=np.nan
+    GT_tr_reshaped=np.reshape(GT_tr, y_train.shape)
     
-    features_data_training_conc = features_data_training[:,conc_feat,:]
-    features_data_cv_conc = features_data_cv[:,conc_feat,:]
-    features_data_test_conc = features_data_test[:,conc_feat,:]
-    X_conc = features_data_training_conc.reshape(features_data_training_conc.shape[0],-1)
-    X_cv_conc = features_data_cv_conc.reshape(features_data_cv_conc.shape[0],-1)
-    X_cv = features_data_cv.reshape(features_data_cv.shape[0],-1)
-    X_test = features_data_test.reshape(features_data_test.shape[0],-1)
-    X_test_conc = features_data_test_conc.reshape(features_data_test_conc.shape[0],-1)
-    Y = labels_1col[np.bool_(training_data)].reshape(1,-1).T
-    Y_cv = labels_1col[np.bool_(cv_data)].reshape(1,-1).T
-    Y_test = labels_1col[np.bool_(test_data)].reshape(1,-1).T
-    matlab_test = matlab_1col[np.bool_(test_data)].reshape(1,-1).T
-    X_all = np.vstack((X,X_cv))
+    Matlab_reshaped = np.reshape(matlab_test_nan, y_test.shape)
+    Matlab_tr_reshaped = np.reshape(matlab_train_nan, y_train.shape)
     
-    X_all_conc = np.vstack((X_conc,X_cv_conc))
-    Y_all = np.vstack((Y,Y_cv))
-    # all the data intact, apparently cv algorithms in sk-learn are smart 
-    # enough to do splitting for cross validation by themselves
-    X_all = np.vstack((X,X_cv))# maybe we need to add test here, but I am actually not sure
-    Y_all = np.vstack((Y,Y_cv))
-    #### next line removes freezing point for classification purposes
-    ###### (because the class is very rare and may interfer with the results)
-    Y_all_wout_1 = Y_all.copy()
-    Y_all_wout_1[Y_all_wout_1==1]=2
-    #############################
-    # let us scale the data
-    scaler = StandardScaler().fit(X_all)
-    scaler_conc = StandardScaler().fit(X_all_conc)
-    X_all=scaler.transform(X_all)
-    X_all_conc=scaler_conc.transform(X_all_conc)
-    X_conc=scaler_conc.transform(X_conc)
-    X_test = scaler.transform(X_test)
-    X_test_conc = scaler_conc.transform(X_test_conc)
+    (test_freeze1, test_freeze2) = supp_methods.find_freezing_by_frozen(test_predicted_reshaped.T, np.int_(np.ones((1,y_test.shape[0]))))
+    (train_freeze1, train_freeze2) = supp_methods.find_freezing_by_frozen(train_predicted_reshaped.T,np.int_(np.ones((1,y_train.shape[0]))))
+    (GT_freeze1, GT_freeze2) = supp_methods.find_freezing_by_frozen(GT_reshaped.T, np.int_(np.ones((1,y_test.shape[0]))))
+    (GT_tr_freeze1, GT_tr_freeze2) = supp_methods.find_freezing_by_frozen(GT_tr_reshaped.T,np.int_(np.ones((1,y_train.shape[0]))))    
     
-    # searching for the values of C and gamma for RBF kernel
-#    C_range = np.logspace(-2, 5, 10)
-#    gamma_range = np.logspace(-4, 1, 10)
-#    param_grid = dict(gamma=gamma_range, C=C_range)
-#    cv = StratifiedShuffleSplit(n_splits=10, train_size=0.01, test_size=0.2, random_state=42)
-#    grid = GridSearchCV(SVC(), param_grid=param_grid, cv=cv,n_jobs=6, verbose=10)
-#    grid.fit(X_all, Y_all.flatten())
-#    grid1= GridSearchCV(SVC(class_weight='balanced'), param_grid=param_grid, cv=cv,n_jobs=6, verbose=10)
-#    grid1.fit(X_all, Y_all.flatten())
-#    print("The best parameters are %s with a score of %0.2f"
-#      % (grid.best_params_, grid.best_score_))
-    C_chosen = 12.915#77.42#grid1.best_params_["C"]
-    gamma_chosen = 0.05994#grid1.best_params_["gamma"]
-#    svm = SVC(kernel='rbf', random_state=0, gamma=gamma_chosen, C=C_chosen,\
-#              n_jobs=5, verbose=10)
-    n_estimators = 20
-#    clf1 = OneVsRestClassifier(BaggingClassifier(SVC(kernel='rbf', gamma=grid1.best_params_["gamma"], C=grid1.best_params_["C"], probability=True, class_weight='balanced'), max_samples=1.0 / n_estimators, n_estimators=n_estimators, n_jobs=6, verbose=10))
-#    clf2 = OneVsRestClassifier(BaggingClassifier(SVC(kernel='rbf', gamma=grid.best_params_["gamma"], C=grid.best_params_["C"], probability=True), max_samples=1.0 / n_estimators, n_estimators=n_estimators, n_jobs=6, verbose=10))
-    clf3 = OneVsRestClassifier(BaggingClassifier(SVC(kernel='rbf', gamma=gamma_chosen, C=C_chosen, probability=True, class_weight='balanced'), max_samples=1.0 / n_estimators, warm_start=True, n_estimators=n_estimators, n_jobs=6, verbose=10))
-#    clf4 = OneVsRestClassifier(BaggingClassifier(SVC(kernel='rbf', gamma=grid.best_params_["gamma"], C=grid.best_params_["C"], probability=True), max_samples=1.0 / n_estimators, n_estimators=n_estimators, warm_start=True, n_jobs=6, verbose=10))
-#    clf1.fit(X_all_conc, Y_all.flatten())
-#    clf2.fit(X_all_conc, Y_all.flatten())
-    cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
-    cv1 = RepeatedKFold(n_splits=10, n_repeats=10, random_state=0)
-    Y_flattened=Y_all_wout_1.flatten()
-#    train_sizes, train_scores, test_scores = learning_curve(clf3, X_all_conc, Y_flattened,\
-#                                                            cv=10, n_jobs=6)#, train_sizes=train_sizes
-#    train_scores_mean = np.mean(train_scores, axis=1)
-#    train_scores_std = np.std(train_scores, axis=1)
-#    test_scores_mean = np.mean(test_scores, axis=1)
-#    test_scores_std = np.std(test_scores, axis=1)
-#    plt.figure()
-#    plt.title('Pup')
-#    plt.grid()
-#    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
-#                     train_scores_mean + train_scores_std, alpha=0.1,
-#                     color="r")
-#    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
-#                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
-#    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-#             label="Training score")
-#    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-#             label="Cross-validation score")
-#
-#    plt.legend(loc="best")
-    clf3.fit(X_all_conc, Y_all_wout_1.flatten())
-#    clf4.fit(X_all_conc, Y_all.flatten())
-#    Predicted_test1 = clf1.predict(X_test_conc)
-#    Predicted_test2 = clf2.predict(X_test_conc)
-    Predicted_test3 = clf3.predict(X_test_conc)
-    Predicted_train3 = clf3.predict(X_conc)
-#    Predicted_test4 = clf4.predict(X_test_conc)
-#    supp_methods.calc_eval_metric(Predicted_test1, Y_test, True, (2287,48))
-#    Predicted1 = supp_methods.transform_back(support.shape, test_data_2d, Predicted_test1)
-#    Predicted2 = supp_methods.transform_back(support.shape, test_data_2d, Predicted_test2)
-    Predicted3 = supp_methods.transform_back(support.shape, test_data_2d, Predicted_test3)
-    Train3 = supp_methods.transform_back(support.shape, training_data_2d, Predicted_train3)
-#    Predicted4 = supp_methods.transform_back(support.shape, test_data_2d, Predicted_test4)
-    GT1 = supp_methods.transform_back(support.shape, test_data_2d, Y_test.flatten())
-    GT1_tr = supp_methods.transform_back(support.shape, training_data_2d, Y.flatten())
-    Matlab1 = supp_methods.transform_back(support.shape, test_data_2d, matlab_test.flatten())
-    # let us try to choose particular features
-#    (aa1, bb1) = supp_methods.find_freezing_by_frozen(Predicted1,test_set_wells)
-#    (aa2, bb2) = supp_methods.find_freezing_by_frozen(Predicted2,test_set_wells)
-    (aa3, bb3) = supp_methods.find_freezing_by_frozen(Predicted3,test_set_wells)
-    (aa3_tr, bb3_tr) = supp_methods.find_freezing_by_frozen(Train3,train_set_wells)
+    (Matlab_freeze1, Matlab_freeze2) = supp_methods.find_freezing_by_frozen(Matlab_reshaped.T, np.int_(np.ones((1,y_test.shape[0]))))
+    (Matlab_tr_freeze1, Matlab_tr_freeze2) = supp_methods.find_freezing_by_frozen(Matlab_tr_reshaped.T,np.int_(np.ones((1,y_train.shape[0]))))        
 #    (aa4, bb4) = supp_methods.find_freezing_by_frozen(Predicted4,test_set_wells)
     # 3,4,6,7,8,9,14
 #    pr1_fr = supp_methods.freezing_est_statistic(bb1, test_set_wells)
 #    pr2_fr = supp_methods.freezing_est_statistic(bb2, test_set_wells)
-    pr3_fr = supp_methods.freezing_est_statistic(bb3, test_set_wells)
-    pr3_tr_fr = supp_methods.freezing_est_statistic(bb3_tr, train_set_wells)
+    pr3_fr = supp_methods.freezing_est_statistic(test_freeze2, np.int_(np.ones((1,y_test.shape[0]))))
+    pr3_tr_fr = supp_methods.freezing_est_statistic(train_freeze2, np.int_(np.ones((1,y_train.shape[0]))))
 #    pr4_fr = supp_methods.freezing_est_statistic(bb4, test_set_wells)
-    gt_fr = supp_methods.freezing_est_statistic(GT1, test_set_wells)
-    gt_tr_fr = supp_methods.freezing_est_statistic(GT1_tr, train_set_wells)
-    matlab_fr = supp_methods.freezing_est_statistic(Matlab1, test_set_wells)
+    gt_fr = supp_methods.freezing_est_statistic(GT_freeze2, np.int_(np.ones((1,y_test.shape[0]))))
+    gt_tr_fr = supp_methods.freezing_est_statistic(GT_tr_freeze2, np.int_(np.ones((1,y_train.shape[0]))))
+    matlab_fr = supp_methods.freezing_est_statistic(Matlab_freeze2, np.int_(np.ones((1,y_test.shape[0]))))
+    matlab_tr_fr = supp_methods.freezing_est_statistic(Matlab_tr_freeze2, np.int_(np.ones((1,y_train.shape[0]))))
 #    (err1, mean_dist1, _)=supp_methods.freezing_metrics(pr1_fr,gt_fr, 10)
 #    (err2, mean_dist2, _)=supp_methods.freezing_metrics(pr2_fr,gt_fr, 10)
-    (err3, mean_dist3, _)=supp_methods.freezing_metrics(pr3_fr,gt_fr, 5)
+    (err3, mean_dist3, _)=supp_methods.freezing_metrics(pr3_fr,gt_fr, 10)
     (err3_tr, mean_dist3_tr, _)=supp_methods.freezing_metrics(pr3_tr_fr,gt_tr_fr, 10)
 #    (err4, mean_dist4, _)=supp_methods.freezing_metrics(pr4_fr,gt_fr, 10)
-    (err_mat, mean_dist_mat, _)=supp_methods.freezing_metrics(matlab_fr,gt_fr, 5)
+    (err_mat, mean_dist_mat, _)=supp_methods.freezing_metrics(matlab_fr,gt_fr, 10)
+    
+    
     None
     
