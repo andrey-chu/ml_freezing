@@ -47,7 +47,7 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     labels = d_labels[:]
     matlab = d_matlab[:]
     total_number_wells = d_images.shape[0]
-    
+    with_ones =1 # if 1 then ones will remain
     support = supp_methods.create_2d_support_chunked(shapes, exclude, labels.shape)
     total_number_chunks = support.shape[0]*support.shape[1]
     support_1col = support.reshape(1,-1).T
@@ -61,7 +61,7 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     metric1=supp_methods.calc_eval_metric(matlab_1col_included, labels_1col_included, True, dataset_lb_shape)
     metric2 = supp_methods.calc_add_metric(matlab, labels, exclude)
     #(a,b,c) = supp_methods.random_divide_sample_chunks(included_number_chunks, 0.6,0.2,0.2)
-    (training_data,cv_data,test_data,train_set_wells,_,test_set_wells) = supp_methods.random_divide_samples(support, exclude, 0.6,0.2)
+    #(training_data,cv_data,test_data,train_set_wells,_,test_set_wells) = supp_methods.random_divide_samples(support, exclude, 0.6,0.2)
     features_data = d_features[:]
     features_data_included = features_data[:,:,:,np.nonzero(np.logical_not(exclude))[1]]
     labels_included = labels[:,np.nonzero(np.logical_not(exclude))[1]]
@@ -88,9 +88,13 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     X_train_sc = scaler.transform(X_train1)
     X_test_sc = scaler.transform(X_test1)
     y_train_wout_1 = y_train1.copy()
-    y_train_wout_1[y_train_wout_1==1]=2
+    # next line removes 1's
+    if with_ones == 1:
+        y_train_wout_1[y_train_wout_1==1]=2
     y_test_wout_1 = y_test1.copy()
-    y_test_wout_1[y_test_wout_1==1]=2
+    # next line removes 1's
+    if with_ones == 1:
+        y_test_wout_1[y_test_wout_1==1]=2
 
 
     
@@ -105,10 +109,14 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     y_train_wout_100 = y_train_wout_1[mask100]
     
     matlab_train_wout1 = matlab_train1.copy()
-    matlab_train_wout1[matlab_train_wout1==1]=2
+    # next line removes 1's
+    if with_ones == 1:
+        matlab_train_wout1[matlab_train_wout1==1]=2
     matlab_test_wout1 = matlab_test1.copy()
-    matlab_test_wout1[matlab_test_wout1==1]=2
-    
+    if with_ones == 1:
+         # next line removes 1's
+        matlab_test_wout1[matlab_test_wout1==1]=2
+   
     matlab_test_nan = np.float_(matlab_test_wout1.copy())
     matlab_test_nan[matlab_test_wout1==100]=np.nan
 
@@ -133,30 +141,31 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     
     
     # Learning curve
-    train_sizes, train_scores, test_scores = learning_curve(clf3, X_train_sc_100, y_train_wout_100,\
-                                                            cv=10, n_jobs=6, verbose=10)#, train_sizes=train_sizes
-    train_scores_mean = np.mean(train_scores, axis=1)
-    train_scores_std = np.std(train_scores, axis=1)
-    test_scores_mean = np.mean(test_scores, axis=1)
-    test_scores_std = np.std(test_scores, axis=1)
-    plt.figure()
-    plt.title('learning curve')
-    plt.grid()
-    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
-                    train_scores_mean + train_scores_std, alpha=0.1,
-                    color="r")
-    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                    test_scores_mean + test_scores_std, alpha=0.1, color="g")
-    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
-            label="Training score")
-    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
-            label="Cross-validation score")
+    # train_sizes, train_scores, test_scores = learning_curve(clf3, X_train_sc_100, y_train_wout_100,\
+    #                                                         cv=10, n_jobs=6, verbose=10)#, train_sizes=train_sizes
+    # train_scores_mean = np.mean(train_scores, axis=1)
+    # train_scores_std = np.std(train_scores, axis=1)
+    # test_scores_mean = np.mean(test_scores, axis=1)
+    # test_scores_std = np.std(test_scores, axis=1)
+    # plt.figure()
+    # plt.title('learning curve')
+    # plt.grid()
+    # plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+    #                 train_scores_mean + train_scores_std, alpha=0.1,
+    #                 color="r")
+    # plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+    #                 test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    # plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+    #         label="Training score")
+    # plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+    #         label="Cross-validation score")
 
-    plt.legend(loc="best")
-    
+    # plt.legend(loc="best")
+    # end of learning curve
     
     # everything is ready, let's fit
     clf3.fit(X_train_sc_100, y_train_wout_100)
+    score = clf3.score(X_train_sc_100, y_train_wout_100)
     Predicted_test3 = clf3.predict(X_test_sc_100)
     Predicted_train3 = clf3.predict(X_train_sc_100)
     
