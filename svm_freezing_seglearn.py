@@ -212,7 +212,6 @@ with h5py.File(united_dataset, 'r') as f:
         GT_tr, _ = seg_find_freezing_by_frozen(train11)
         
     (err12_conserve, mean_dist12_conserve, _)=supp_methods.freezing_metrics(np.asarray(freeze2_conserve),np.asarray(freeze_GT), 10)
-    (err12, mean_dist12, _)=supp_methods.freezing_metrics(np.asarray(freeze2),np.asarray(), 10)
     (err12_tr, mean_dist12_tr, _)=supp_methods.freezing_metrics(np.asarray(freeze_tr),np.asarray(GT_tr), 10)
     (err12_matlab, mean_dist12_matlab, _)=supp_methods.freezing_metrics(np.asarray(matlab_conserve),np.asarray(freeze_GT), 10)
     # print("CV Scores: ", pd.DataFrame(cv_scores))
