@@ -123,7 +123,7 @@ def add_features(prev_features, to_add):
 
 datadir = "/data/Freezing_samples/h5data_new/"
 united_dataset = datadir + "united_raw_dataset_96freez31.hdf5"
-change_labels =1
+change_labels_bool =1
 conservative = 0
 with h5py.File(united_dataset, 'r') as f:
     d_images = f["Raw_data/images_dataset"]
@@ -157,11 +157,11 @@ with h5py.File(united_dataset, 'r') as f:
     #(training_data,cv_data,test_data,train_set_wells,_,test_set_wells) = supp_methods.random_divide_samples(support, exclude, 0.6,0.2)
     # the format of time series to work with seglearn is 
     # first we will change labels into only 2 (3?)
-    if change_labels == 1:
+    if change_labels_bool == 1:
         new_labels = change_labels_preserve(labels,3)
         new_matlab = change_labels_preserve(matlab,3)
     else:
-        new_labels = labels
+        new_labels_bool = labels
         new_matlab = matlab
     # now let us turn all the data into a format suitable
     #chosen_features = [3]
