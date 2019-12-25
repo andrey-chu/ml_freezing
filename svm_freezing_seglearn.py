@@ -60,6 +60,24 @@ def change_labels(labels, number, freezing_length=20):
             changed_labels[:fp[i]-freezing_length,i] =0
             changed_labels[fp[i]-freezing_length:fp[i],i] =2
     return changed_labels
+
+def change_labels_preserve(labels, number, freezing_length=31):
+    # input: labels in timepoints x wells
+    #       number: if 2 then labels changed into below freezing (0) above freezing (3)
+    #               if 3 then below freezing (0), freezing (2), above freezing (3)
+    # assumes: in input the first 1 is at the freezing point
+    changed_labels = np.ones(labels.shape)*3
+    fp = np.argmax(labels==1, axis=0)+1
+    if number == 2:
+        for i in range(labels.shape[1]):
+            changed_labels[:fp[i],i] =0
+    elif number==3:
+        for i in range(labels.shape[1]):
+            changed_labels[:fp[i]-freezing_length,i] =0
+            changed_labels[fp[i]-freezing_length:fp[i],i] =2
+    return changed_labels
+
+
 def fill_in_nans(npstring):
     for i in range(npstring.shape[0]-1,-1,-1):
         if np.isnan(npstring[i]):
@@ -105,7 +123,7 @@ def add_features(prev_features, to_add):
 
 datadir = "/data/Freezing_samples/h5data_new/"
 united_dataset = datadir + "united_raw_dataset_96freez31.hdf5"
-change_labels =0
+change_labels =1
 conservative = 0
 with h5py.File(united_dataset, 'r') as f:
     d_images = f["Raw_data/images_dataset"]
@@ -140,8 +158,8 @@ with h5py.File(united_dataset, 'r') as f:
     # the format of time series to work with seglearn is 
     # first we will change labels into only 2 (3?)
     if change_labels == 1:
-        new_labels = change_labels(labels,3)
-        new_matlab = change_labels(matlab,3)
+        new_labels = change_labels_preserve(labels,3)
+        new_matlab = change_labels_preserve(matlab,3)
     else:
         new_labels = labels
         new_matlab = matlab
