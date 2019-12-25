@@ -47,7 +47,7 @@ with h5py.File(chunked_united_dataset, 'r') as f:
     labels = d_labels[:]
     matlab = d_matlab[:]
     total_number_wells = d_images.shape[0]
-    with_ones =1 # if 1 then ones will remain
+    with_ones =0 # if 1 then ones will remain
     support = supp_methods.create_2d_support_chunked(shapes, exclude, labels.shape)
     total_number_chunks = support.shape[0]*support.shape[1]
     support_1col = support.reshape(1,-1).T
