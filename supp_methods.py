@@ -226,12 +226,14 @@ def seg_find_freezing_by_frozen(predicted_array1):
         length_array = predicted_array[i].shape[0]
         array_i=predicted_array[i]
         reversed_array = array_i[::-1]
+        if i==138:
+            import pdb; pdb.set_trace()
         if np.sum(array_i==1)==0:
         # if there is no 1's in array
             itera = 0
             j = reversed_array[itera]
             if np.sum(array_i==3)>0:
-                while (j!=3 and not(np.isnan(j))):
+                while (j!=3 and j!=2 and not(np.isnan(j))):# added j!= for those cases when 2's come after 3's
                     itera +=1
                     j=reversed_array[itera]
             # let's go from the end
