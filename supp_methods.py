@@ -192,7 +192,7 @@ def find_freezing_by_frozen(predicted_array, wells_set):
             itera = 0
             j = reversed_array[itera]
             if np.sum(array_i==3)>0:
-                while (j!=3 and not(np.isnan(j))):
+                while (j!=3 and j!=2 and not(np.isnan(j))):
                     itera +=1
                     j=reversed_array[itera]
             # let's go from the end
@@ -231,7 +231,7 @@ def seg_find_freezing_by_frozen(predicted_array1):
             itera = 0
             j = reversed_array[itera]
             if np.sum(array_i==3)>0:
-                while (j!=3 and not(np.isnan(j))):
+                while (j!=3 and j!=2 and not(np.isnan(j))):# added j!= for those cases when 2's come after 3's
                     itera +=1
                     j=reversed_array[itera]
             # let's go from the end

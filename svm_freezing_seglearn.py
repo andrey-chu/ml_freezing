@@ -36,6 +36,11 @@ from seglearn.transform import FunctionTransformer
 from seglearn.feature_functions import mean, median, abs_energy, std, skew, mean_crossings, minimum, maximum, mean_diff,\
 zero_crossing, var
 from supp_methods import seg_find_freezing_by_frozen
+import platform
+if platform.node()=='choo-desktop':
+    from branch_init_choo import datadir
+elif platform.node()=='andrey-cfin':
+    from branch_init_cfin import datadir
 
 def features2seg(features, shapes):
     return [features[:int(shapes[i,1]),:,i] for i in range(features.shape[2])]
@@ -121,7 +126,7 @@ def add_features(prev_features, to_add):
     return new_features
 
 
-datadir = "/data/Freezing_samples/h5data_new/"
+#datadir = "/data/Freezing_samples/h5data_new/"
 united_dataset = datadir + "united_raw_dataset_96freez31.hdf5"
 change_labels_bool =1
 conservative = 0
