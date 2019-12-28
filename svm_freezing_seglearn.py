@@ -127,7 +127,7 @@ def add_features(prev_features, to_add):
 
 
 #datadir = "/data/Freezing_samples/h5data_new/"
-united_dataset = datadir + "united_raw_dataset_384freez31.hdf5"
+united_dataset = datadir + "united_raw_dataset_96freez31.hdf5"
 change_labels_bool =1
 conservative = 0
 with h5py.File(united_dataset, 'r') as f:
