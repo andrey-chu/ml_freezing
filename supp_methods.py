@@ -226,8 +226,6 @@ def seg_find_freezing_by_frozen(predicted_array1):
         length_array = predicted_array[i].shape[0]
         array_i=predicted_array[i]
         reversed_array = array_i[::-1]
-        if i==138:
-            import pdb; pdb.set_trace()
         if np.sum(array_i==1)==0:
         # if there is no 1's in array
             itera = 0
