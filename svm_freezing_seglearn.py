@@ -125,8 +125,27 @@ def add_features(prev_features, to_add):
             it+=1
     return new_features
 
+def extract_haralick(images_d):
+    import mahotas as mt
+    print("Extracting Haralick features")
+    # features1=np.mean(mt.features.haralick(image), axis=0)
+    image_shape= images_d.shape
+    # import pdb; pdb.set_trace()
+    features = np.empty((image_shape[3], 13, image_shape[0])) # the 14th 
+                # feature is not given in the lib, we should calculate it ourselves
+                # if needed
+    for i in range(image_shape[0]):
+        print(str(i)+" out of "+str(image_shape[0]))
+        for j in range(image_shape[3]):
+            print(str(j)+" out of "+str(image_shape[3]))
+            image = images_d[i,:,:,j]
+            features[j,:,i]=np.mean(mt.features.haralick(image), axis=0)
+    return features
+    
 
-#datadir = "/data/Freezing_samples/h5data_new/"
+
+
+datadir = "/data/Freezing_samples/h5data_new/"
 united_dataset = datadir + "united_raw_dataset_96freez31.hdf5"
 change_labels_bool =1
 conservative = 0
@@ -139,7 +158,9 @@ with h5py.File(united_dataset, 'r') as f:
     d_shapes=f["Raw_data/shapes_dataset"]
     d_datasets=f["Raw_data/datasets_dataset"]
     d_substance=f["Raw_data/substance_dataset"]
-    features_data = d_features[:]
+    
+    #features_data = d_features[:]
+    features_data = extract_haralick(d_images)
     shapes = d_shapes[:]
     exclude = d_exclude[:]
     dataset_im_shape = d_images.shape
@@ -170,7 +191,8 @@ with h5py.File(united_dataset, 'r') as f:
         new_matlab = matlab
     # now let us turn all the data into a format suitable
     #chosen_features = [3]
-    chosen_features=[0,1,2,3,5, 6,7,8,9,13]
+    #chosen_features=[0,1,2,3,5, 6,7,8,9,13]
+    chosen_features=[0,1,2,3,5, 6,7,8,9,12]
     new_features_seg = features2seg(features_data[:,chosen_features,:],shapes)
     #new_features_seg = add_features(new_features_seg, ['lin'])
     new_labels_seg = labels2seg(new_labels,shapes)
