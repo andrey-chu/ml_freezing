@@ -6,10 +6,16 @@ This module loads the needed data from matlab files and saves them in h5py forma
 
 @author: andrey
 """
-data_384_dirlist = ['/data/Freezing_samples/Test384Bakterie_1/','/data/Freezing_samples/Test384Vand_1/']
-data_96_dirlist = ['/data/Freezing_samples/Test96Bakterie_1/', '/data/Freezing_samples/Test96Bakterie_2/', '/data/Freezing_samples/Test96Vand_1/']
-h5data_location384 = '/data/Freezing_samples/h5data_new/'
-h5data_location96 = '/data/Freezing_samples/h5data_new/'
+import platform
+if platform.node()=='choo-desktop':
+    from branch_init_choo import datadir
+elif platform.node()=='andrey-cfin':
+    from branch_init_cfin import datadir
+    
+data_384_dirlist = [datadir+'../Test384Bakterie_1/',datadir+'../Freezing_samples/Test384Vand_1/']
+data_96_dirlist = [datadir+'../Test96Bakterie_1/', datadir+'../Test96Bakterie_2/', datadir+'../Test96Vand_1/']
+h5data_location384 = datadir
+h5data_location96 = datadir
 substances384 = ['bact', 'water']
 substances96 = ['bact', 'bact', 'water']
 wellsize384 = [52, 52]
@@ -29,6 +35,7 @@ import scipy.io as spio
 import numpy as np
 #import csv
 import pandas as pd
+from supp_methods import extract_haralick_parallel
 def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, freezing_length=11):
     # freezing_length: an additional parameter that denotes number of timepoint that freezing occures in
      for i in range(len(dirlist)):
@@ -49,7 +56,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
          # since h5py now has this fantastic option of virtual datasets what we
          # are going to do is to create a dataset for each sample and then unite
          # them in a virtual dataset
-         filename=h5data_location+str(i)+'_raw_dataset_'+str(numwells)+substances[i]+str(i)+'freez'+str(freezing_length)+'.hdf5'
+         filename=h5data_location+str(i)+'_raw_dataset_'+str(numwells)+substances[i]+str(i)+'freez'+str(freezing_length)+'f2.hdf5'
          with h5py.File(filename, 'w') as f:
             print('Saving into:'+filename)
             g1 = f.create_group('Raw_data')
@@ -61,6 +68,8 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
             positions_dtst = np.empty((2,numwells),np.uint8)
             labels_dtst = np.empty((1,numpoints,numwells), np.uint8)
             features_dtst=np.empty((numpoints,14,numwells), np.float32)
+            features2_dtst=np.empty((numpoints,13,numwells), np.float32) # these features are calculated in python (Implementation 
+                                                                         # in mahota does not calc the 14th feature)
             matlab_dtst = np.empty((1,numpoints,numwells),np.uint8)
             substance_dtst = np.empty((1,numwells),np.uint8)
             exclude_dtst = np.zeros((1,numwells),np.bool)
@@ -70,6 +79,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
             g1.create_dataset('temperatures_dataset', compression="lzf", data=temperatures)
             d_labels = g1.create_dataset('labels_dataset', compression="lzf", data=labels_dtst)
             d_features = g1.create_dataset('features_dataset', compression="lzf", data=features_dtst)
+            d_features2 = g1.create_dataset('features2_dataset', compression=7, data=features2_dtst)
             d_matlab = g1.create_dataset('matlab_dataset', compression="lzf", data=matlab_dtst)
             d_substance = g1.create_dataset('substance_dataset', compression="lzf", data=substance_dtst)
             d_exclude = g1.create_dataset('exclude_dataset', compression="lzf", data=exclude_dtst)
@@ -111,6 +121,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
                     
                     iterator+=1
+            d_features2 = extract_haralick_parallel(d_images, 6)
 def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, chunklength, freezing_length=11):
     # new length is length- (chunklength-1)
     for i in range(len(dirlist)):

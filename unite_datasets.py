@@ -7,7 +7,7 @@ Created on Wed Nov  6 21:48:04 2019
 """
 import h5py
 import numpy as np
-from svm_freezing_seglearn import extract_haralick
+from supp_methods import extract_haralick
 import platform
 if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
@@ -56,7 +56,7 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
         chunklength = final_shape_images[3]
     
     
-    with h5py.File(united_name, "rw", libver="latest") as f1:
+    with h5py.File(united_name, "w", libver="latest") as f1:
         g1 = f1.create_group('Raw_data')
         shapes_size = [int(np.sum(shape_tmp[:,0])), shape_tmp.shape[1]-2]
         shapes_placeholder = np.ones((shapes_size))
@@ -131,9 +131,9 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
         f1.create_virtual_dataset("Raw_data/substance_dataset", layout_substance, fillvalue=-5)
         f1.create_virtual_dataset("Raw_data/exclude_dataset", layout_exclude, fillvalue=-5)
         f1.create_dataset("Raw_data/datasets_dataset", compression="lzf", data=datasets_dtst)
-        img = f1["Raw_data/images_dataset"]
-        features_2 = extract_haralick(img)
-        f1.create_dataset("Raw_data/features2_dataset", compression="lzf", data=features_2)
+        #img = f1["Raw_data/images_dataset"]
+        #features_2 = extract_haralick(img)
+        #f1.create_dataset("Raw_data/features2_dataset", compression="9", data=features_2)
 hd5py_dir = datadir
 #unite_datasets([hd5py_dir+'0_chunked_dataset_384bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_384water1freez31.hdf5'], hd5py_dir+'united_chunked_dataset_384freez31.hdf5', 'chunked')
 #unite_datasets([hd5py_dir+'0_chunked_dataset_96bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_96bact1freez31.hdf5', hd5py_dir+'2_chunked_dataset_96water2freez31.hdf5'], hd5py_dir+'united_chunked_dataset_96freez31.hdf5', 'chunked')

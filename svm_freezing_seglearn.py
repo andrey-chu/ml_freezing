@@ -35,7 +35,7 @@ from seglearn.base import TS_Data
 from seglearn.transform import FunctionTransformer
 from seglearn.feature_functions import mean, median, abs_energy, std, skew, mean_crossings, minimum, maximum, mean_diff,\
 zero_crossing, var
-from supp_methods import seg_find_freezing_by_frozen
+from supp_methods import seg_find_freezing_by_frozen, extract_haralick
 import platform
 if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
@@ -125,22 +125,6 @@ def add_features(prev_features, to_add):
             it+=1
     return new_features
 
-def extract_haralick(images_d):
-    import mahotas as mt
-    print("Extracting Haralick features")
-    # features1=np.mean(mt.features.haralick(image), axis=0)
-    image_shape= images_d.shape
-    # import pdb; pdb.set_trace()
-    features = np.empty((image_shape[3], 13, image_shape[0])) # the 14th 
-                # feature is not given in the lib, we should calculate it ourselves
-                # if needed
-    for i in range(image_shape[0]):
-        print(str(i)+" out of "+str(image_shape[0]))
-        for j in range(image_shape[3]):
-            print(str(j)+" out of "+str(image_shape[3]))
-            image = images_d[i,:,:,j]
-            features[j,:,i]=np.mean(mt.features.haralick(image), axis=0)
-    return features
     
 
 
@@ -246,6 +230,7 @@ with h5py.File(united_dataset, 'r') as f:
         matlab_conserve = [matlab_test[i].shape[0]-np.argmax(np.flip(np.int_(np.logical_not(matlab_test[i])))) for i in range(len(matlab_test))]
         matlab_tr_conserve = [matlab_train[i].shape[0]-np.argmax(np.flip(np.int_(np.logical_not(matlab_train[i])))) for i in range(len(matlab_train))]
     else:
+
         freeze2, _ = seg_find_freezing_by_frozen(test21)
         freeze2_conserve = freeze2
         freeze_GT, _ = seg_find_freezing_by_frozen(test11)
