@@ -35,7 +35,7 @@ import scipy.io as spio
 import numpy as np
 #import csv
 import pandas as pd
-from supp_methods import extract_haralick_parallel
+from supp_methods import extract_haralick_parallel, extract_haralick
 def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, freezing_length=11):
     # freezing_length: an additional parameter that denotes number of timepoint that freezing occures in
      for i in range(len(dirlist)):
@@ -121,7 +121,8 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
                     
                     iterator+=1
-            features2 = extract_haralick_parallel(d_images, 7)
+            #features2 = extract_haralick_parallel(d_images, 7)
+            d_features2 = extract_haralick(d_images)
             d_features2 = g1.create_dataset('features2_dataset', compression=7, data=features2)
 def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, chunklength, freezing_length=11):
     # new length is length- (chunklength-1)

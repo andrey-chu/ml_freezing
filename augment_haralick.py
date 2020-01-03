@@ -27,11 +27,15 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
     images_d = f1['Raw_data/images_dataset']
     labels_d = f1['Raw_data/labels_dataset']
     features_d = f1['Raw_data/features_dataset']
+    exclude_d = f1['Raw_data/exclude_dataset']
+    
     print(images_d.shape)
     print(features_d.shape)
     num_wells_orig = images_d.shape[0]
     labels_aug = np.empty((1,labels_d.shape[1], angles.shape[0]*labels_d.shape[2]))
-    
+    features_aug = np.empty((labels_d.shape[1],13,num_wells_orig*angles.shape[0]))
+    images_aug = np.empty((num_wells_orig*angles.shape[0],images_d.shape[1],images_d.shape[2],labels_d.shape[1]))
+    aug_well = 0
     for angle in angles:
         # for each well in original database we will augment
         fps = np.argmax(labels_d[0,:,:], axis=0)
@@ -111,18 +115,24 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
                 imstack_shifted[:,:,:rand_shift]=imstack_rotated
                 labels_shifted[:,rand_shift:]=labels[0,-1]
                 labels_shifted[:,:rand_shift]=labels[:,i]
-            labels_new = np.uint8(np.empty((1,labels.shape[0], labels.shape[1])))
-            labels_new=labels_shifted[:,:labels.shape[1]]
-            imstack_new = np.uint8(np.empty((imstack_rotated.shape[0], imstack_rotated.shape[1],
-                                        imstack_rotated.shape[2])))
-            imstack_new =imstack_shifted[:,:,:labels.shape[1]]
+            
+            labels_new=labels_shifted[:,:labels.shape[0]]
+
+            imstack_new =imstack_shifted[:,:,:labels.shape[0]]
             
             # now let us calculate the haralick parameters
-            
+            images_aug[aug_well,:,:,:]=imstack_new
+            labels_aug[0,:,aug_well]=labels_new
             # and push them to the database
-            feature_gt=np.mean(mt.features.haralick(image), axis=0)
-            #let us check the pictures (movie?)
             
+            for j in range(imstack_new.shape[2]):
+                None
+                #features_aug[j,:,aug_well]=np.mean(mt.features.haralick(image), axis=0)
+            #let us check the pictures (movie?)
+            aug_well+=1
+    f2.create_dataset("Raw_data/features2_dataset", compression=8, data=features_aug)
+    f2.create_dataset("Raw_data/images_dataset", compression=8, data=images_aug)
+    f2.create_dataset("Raw_data/labels_dataset", compression=8, data=labels_aug)
     
 
     None

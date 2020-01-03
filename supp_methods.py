@@ -270,7 +270,7 @@ def freezing_metrics(freezepoints, freezepoints_gt, thresh):
     mean_dist = np.mean(np.abs(difference))
     return (err, mean_dist, errs)
 
-def extract_haralick(images_d, cores_num):
+def extract_haralick(images_d):
     
     # the method gets the image database, reads it and outputs the features
     import mahotas as mt
@@ -285,7 +285,7 @@ def extract_haralick(images_d, cores_num):
                 # feature is not given in the lib, we should calculate it ourselves
                 # if needed
     for i in range(image_shape[0]):
-        print(str(100*i/image_shape[0])+"%")
+        print("Extracting progress: {0:6.2f}%".format(100*i/image_shape[0]))
         for j in range(image_shape[3]):
             #print(str(j)+" out of "+str(image_shape[3]))
             image = images_d[i,:,:,j]
