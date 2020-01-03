@@ -307,9 +307,11 @@ def extract_haralick_parallel(images_d, cores_num):
     # features1=np.mean(mt.features.haralick(image), axis=0)
     image_shape= images_d.shape
     # import pdb; pdb.set_trace()
-    features = np.empty((image_shape[3], 13, image_shape[0])) # the 14th 
+    features_array = np.empty((image_shape[3], 13, image_shape[0])) # the 14th 
                 # feature is not given in the lib, we should calculate it ourselves
                 # if needed
-    features=Parallel(n_jobs=cores_num)(delayed(haralik_feat)(images_d[i,:,:,:])  for i in range(image_shape[0]))
-    import pdb; pdb.set_trace()  
-    return features
+    features=Parallel(n_jobs=cores_num, verbose=5)(delayed(haralik_feat)(images_d[i,:,:,:])  for i in range(image_shape[0]))
+    #import pdb; pdb.set_trace()
+    for i in len(features):
+        features_array[i, :, :] =features[i].T
+    return features_array

@@ -12,7 +12,7 @@ if platform.node()=='choo-desktop':
 elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
     
-data_384_dirlist = [datadir+'../Test384Bakterie_1/',datadir+'../Freezing_samples/Test384Vand_1/']
+data_384_dirlist = [datadir+'../Test384Bakterie_1/',datadir+'../Test384Vand_1/']
 data_96_dirlist = [datadir+'../Test96Bakterie_1/', datadir+'../Test96Bakterie_2/', datadir+'../Test96Vand_1/']
 h5data_location384 = datadir
 h5data_location96 = datadir
@@ -79,8 +79,8 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
             g1.create_dataset('temperatures_dataset', compression="lzf", data=temperatures)
             d_labels = g1.create_dataset('labels_dataset', compression="lzf", data=labels_dtst)
             d_features = g1.create_dataset('features_dataset', compression="lzf", data=features_dtst)
-            d_features2 = g1.create_dataset('features2_dataset', compression=7, data=features2_dtst)
-            d_matlab = g1.create_dataset('matlab_dataset', compression="lzf", data=matlab_dtst)
+            
+            d_matlab = g1.create_dataset('matlab_dataset', compression=7, data=matlab_dtst)
             d_substance = g1.create_dataset('substance_dataset', compression="lzf", data=substance_dtst)
             d_exclude = g1.create_dataset('exclude_dataset', compression="lzf", data=exclude_dtst)
             g1.attrs['Comments']=comments_dtst
@@ -121,7 +121,8 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
                     
                     iterator+=1
-            d_features2 = extract_haralick_parallel(d_images, 6)
+            features2 = extract_haralick_parallel(d_images, 7)
+            d_features2 = g1.create_dataset('features2_dataset', compression=7, data=features2)
 def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, chunklength, freezing_length=11):
     # new length is length- (chunklength-1)
     for i in range(len(dirlist)):
