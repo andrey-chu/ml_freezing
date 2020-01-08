@@ -68,7 +68,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
             positions_dtst = np.empty((2,numwells),np.uint8)
             labels_dtst = np.empty((1,numpoints,numwells), np.uint8)
             features_dtst=np.empty((numpoints,14,numwells), np.float32)
-            features2_dtst=np.empty((numpoints,13,numwells), np.float32) # these features are calculated in python (Implementation 
+            #features2_dtst=np.empty((numpoints,13,numwells), np.float32) # these features are calculated in python (Implementation 
                                                                          # in mahota does not calc the 14th feature)
             matlab_dtst = np.empty((1,numpoints,numwells),np.uint8)
             substance_dtst = np.empty((1,numwells),np.uint8)
@@ -122,8 +122,8 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                     
                     iterator+=1
             #features2 = extract_haralick_parallel(d_images, 7)
-            d_features2 = extract_haralick(d_images)
-            d_features2 = g1.create_dataset('features2_dataset', compression=7, data=features2)
+            features2 = extract_haralick(d_images)
+            g1.create_dataset('features2_dataset', compression=7, data=features2)
 def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, chunklength, freezing_length=11):
     # new length is length- (chunklength-1)
     for i in range(len(dirlist)):
@@ -229,6 +229,7 @@ def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwel
                  
 def encode_substances(substance):
     return {
+        'virt': 101,
         'bact': 1,
         'water': 0
         }.get(substance, 0)

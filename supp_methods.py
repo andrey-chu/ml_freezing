@@ -289,6 +289,7 @@ def extract_haralick(images_d):
         for j in range(image_shape[3]):
             #print(str(j)+" out of "+str(image_shape[3]))
             image = images_d[i,:,:,j]
+            # import pdb; pdb.set_trace()
             features[j,:,i]=np.mean(mt.features.haralick(image), axis=0)
     return features
 
