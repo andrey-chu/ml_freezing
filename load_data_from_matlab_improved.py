@@ -74,11 +74,11 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
             substance_dtst = np.empty((1,numwells),np.uint8)
             exclude_dtst = np.zeros((1,numwells),np.bool)
             comments_dtst = ['']*numwells
-            d_images = g1.create_dataset('images_dataset', compression="lzf", data=images_dtst)
+            d_images = g1.create_dataset('images_dataset', compression=7, data=images_dtst)
             d_position = g1.create_dataset('positions_dataset', compression="lzf", data=positions_dtst)
             g1.create_dataset('temperatures_dataset', compression="lzf", data=temperatures)
             d_labels = g1.create_dataset('labels_dataset', compression="lzf", data=labels_dtst)
-            d_features = g1.create_dataset('features_dataset', compression="lzf", data=features_dtst)
+            d_features = g1.create_dataset('features_dataset', compression=7, data=features_dtst)
             
             d_matlab = g1.create_dataset('matlab_dataset', compression=7, data=matlab_dtst)
             d_substance = g1.create_dataset('substance_dataset', compression="lzf", data=substance_dtst)
@@ -121,9 +121,11 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
                     
                     iterator+=1
-            #features2 = extract_haralick_parallel(d_images, 7)
-            features2 = extract_haralick(d_images)
-            g1.create_dataset('features2_dataset', compression=7, data=features2)
+            features2 = extract_haralick_parallel(d_images, 7)
+            features2_reshaped = np.swapaxes(features2, 0,2)
+            print("The shape of features2 is: {0}".format(features2_reshaped.shape))
+            print("The shape of features is: {0}".format(features_dtst.shape))
+            g1.create_dataset('features2_dataset', compression=7, data=features2_reshaped)
 def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, substances, chunklength, freezing_length=11):
     # new length is length- (chunklength-1)
     for i in range(len(dirlist)):
