@@ -269,3 +269,51 @@ def freezing_metrics(freezepoints, freezepoints_gt, thresh):
     err = np.mean(errs)
     mean_dist = np.mean(np.abs(difference))
     return (err, mean_dist, errs)
+
+def extract_haralick(images_d):
+    
+    # the method gets the image database, reads it and outputs the features
+    import mahotas as mt
+    import numpy as np
+
+    
+    print("Extracting Haralick features")
+    # features1=np.mean(mt.features.haralick(image), axis=0)
+    image_shape= images_d.shape
+    # import pdb; pdb.set_trace()
+    features = np.empty((image_shape[3], 13, image_shape[0])) # the 14th 
+                # feature is not given in the lib, we should calculate it ourselves
+                # if needed
+    for i in range(image_shape[0]):
+        print("Extracting progress: {0:6.2f}%".format(100*i/image_shape[0]))
+        for j in range(image_shape[3]):
+            #print(str(j)+" out of "+str(image_shape[3]))
+            image = images_d[i,:,:,j]
+            # import pdb; pdb.set_trace()
+            features[j,:,i]=np.mean(mt.features.haralick(image), axis=0)
+    return features
+
+def extract_haralick_parallel(images_d, cores_num=6):
+    
+    # the method gets the image database, reads it and outputs the features
+    import mahotas as mt
+    import numpy as np
+    from joblib import Parallel, delayed
+    def haralik_feat(image_stk):
+        features1=np.empty((image_stk.shape[2], 13))
+        for j in range(image_stk.shape[2]):
+            image = image_stk[:,:,j]
+            features1[j,:]=np.mean(mt.features.haralick(image), axis=0)
+        return features1
+    print("Extracting Haralick features")
+    # features1=np.mean(mt.features.haralick(image), axis=0)
+    image_shape= images_d.shape
+    # import pdb; pdb.set_trace()
+    features_array = np.empty((image_shape[0], 13, image_shape[3])) # the 14th 
+                # feature is not given in the lib, we should calculate it ourselves
+                # if needed
+    features=Parallel(n_jobs=cores_num, verbose=5)(delayed(haralik_feat)(images_d[i,:,:,:])  for i in range(image_shape[0]))
+    #import pdb; pdb.set_trace()
+    for i in range(len(features)):
+        features_array[i, :, :] =features[i].T
+    return np.swapaxes(features_array, 0,2)

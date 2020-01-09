@@ -35,7 +35,7 @@ from seglearn.base import TS_Data
 from seglearn.transform import FunctionTransformer
 from seglearn.feature_functions import mean, median, abs_energy, std, skew, mean_crossings, minimum, maximum, mean_diff,\
 zero_crossing, var
-from supp_methods import seg_find_freezing_by_frozen
+from supp_methods import seg_find_freezing_by_frozen, extract_haralick
 import platform
 if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
@@ -125,8 +125,11 @@ def add_features(prev_features, to_add):
             it+=1
     return new_features
 
+    
 
-#datadir = "/data/Freezing_samples/h5data_new/"
+
+
+datadir = "/data/Freezing_samples/h5data_new/"
 united_dataset = datadir + "united_raw_dataset_96freez31.hdf5"
 change_labels_bool =1
 conservative = 0
@@ -139,7 +142,9 @@ with h5py.File(united_dataset, 'r') as f:
     d_shapes=f["Raw_data/shapes_dataset"]
     d_datasets=f["Raw_data/datasets_dataset"]
     d_substance=f["Raw_data/substance_dataset"]
-    features_data = d_features[:]
+    
+    #features_data = d_features[:]
+    features_data = extract_haralick(d_images)
     shapes = d_shapes[:]
     exclude = d_exclude[:]
     dataset_im_shape = d_images.shape
@@ -170,7 +175,8 @@ with h5py.File(united_dataset, 'r') as f:
         new_matlab = matlab
     # now let us turn all the data into a format suitable
     #chosen_features = [3]
-    chosen_features=[0,1,2,3,5, 6,7,8,9,13]
+    #chosen_features=[0,1,2,3,5, 6,7,8,9,13]
+    chosen_features=[0,1,2,3,5, 6,7,8,9,12]
     new_features_seg = features2seg(features_data[:,chosen_features,:],shapes)
     #new_features_seg = add_features(new_features_seg, ['lin'])
     new_labels_seg = labels2seg(new_labels,shapes)
@@ -225,6 +231,7 @@ with h5py.File(united_dataset, 'r') as f:
         matlab_conserve = [matlab_test[i].shape[0]-np.argmax(np.flip(np.int_(np.logical_not(matlab_test[i])))) for i in range(len(matlab_test))]
         matlab_tr_conserve = [matlab_train[i].shape[0]-np.argmax(np.flip(np.int_(np.logical_not(matlab_train[i])))) for i in range(len(matlab_train))]
     else:
+
         freeze2, _ = seg_find_freezing_by_frozen(test21)
         freeze2_conserve = freeze2
         freeze_GT, _ = seg_find_freezing_by_frozen(test11)

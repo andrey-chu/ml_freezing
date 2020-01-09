@@ -7,6 +7,12 @@ Created on Wed Nov  6 21:48:04 2019
 """
 import h5py
 import numpy as np
+from supp_methods import extract_haralick
+import platform
+if platform.node()=='choo-desktop':
+    from branch_init_choo import datadir
+elif platform.node()=='andrey-cfin':
+    from branch_init_cfin import datadir
 
 def unite_datasets(list_to_unite, united_name, raw_chunked):
     if raw_chunked == 'raw':
@@ -26,13 +32,13 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
 
         with h5py.File(list_to_unite[i], 'r') as f:
             images_d = f['Raw_data/images_dataset']
-            position_d = f['Raw_data/positions_dataset']
-            temperatures_d =f['Raw_data/temperatures_dataset']
-            labels_d = f['Raw_data/labels_dataset']
-            features_d = f['Raw_data/features_dataset']
-            matlab_d = f['Raw_data/matlab_dataset']
-            substance_d = f['Raw_data/substance_dataset']
-            exclude_d = f['Raw_data/exclude_dataset']
+            # position_d = f['Raw_data/positions_dataset']
+            # temperatures_d =f['Raw_data/temperatures_dataset']
+            # labels_d = f['Raw_data/labels_dataset']
+            # features_d = f['Raw_data/features_dataset']
+            # matlab_d = f['Raw_data/matlab_dataset']
+            # substance_d = f['Raw_data/substance_dataset']
+            # exclude_d = f['Raw_data/exclude_dataset']
             shape_tmp[i] = images_d.shape
 #            print(substance_d.shape)
 #            print(labels_d.dtype)
@@ -70,6 +76,7 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
             layout_features=h5py.VirtualLayout(shape=(maxdatalines, 14, chunklength, totalwells), dtype="f4")
         else:
             layout_features=h5py.VirtualLayout(shape=(maxdatalines, 14, totalwells), dtype="f4")
+            layout_features2=h5py.VirtualLayout(shape=(maxdatalines, 13, totalwells), dtype="f4")
         layout_matlab=h5py.VirtualLayout(shape=(maxdatalines, totalwells), dtype="u1")
         layout_substance=h5py.VirtualLayout(shape=(1,totalwells), dtype="u1")
         layout_exclude=h5py.VirtualLayout(shape=(1,totalwells), dtype=np.bool)
@@ -90,6 +97,9 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
                 vsource_features= h5py.VirtualSource(list_to_unite[i], "Raw_data/features_dataset",\
                                                   shape=(currentpoints, 14,  currentwells))
                 layout_features[:currentpoints,:,int(iter1):int(currentwells+iter1)] = vsource_features
+                vsource_features2= h5py.VirtualSource(list_to_unite[i], "Raw_data/features2_dataset",\
+                                                  shape=(currentpoints, 13,  currentwells))
+                layout_features2[:currentpoints,:,int(iter1):int(currentwells+iter1)] = vsource_features2                
                 
            # layout_images[i]=vsource_images
             vsource_position = h5py.VirtualSource(list_to_unite[i], "Raw_data/position_dataset",\
@@ -121,15 +131,19 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
         f1.create_virtual_dataset("Raw_data/temperatures_dataset", layout_temperatures, fillvalue=np.nan)
         f1.create_virtual_dataset("Raw_data/labels_dataset", layout_labels, fillvalue=100)
         f1.create_virtual_dataset("Raw_data/features_dataset", layout_features, fillvalue=np.nan)
+        f1.create_virtual_dataset("Raw_data/features2_dataset", layout_features2, fillvalue=np.nan)
         f1.create_virtual_dataset("Raw_data/matlab_dataset", layout_matlab, fillvalue=100)
         f1.create_virtual_dataset("Raw_data/substance_dataset", layout_substance, fillvalue=-5)
         f1.create_virtual_dataset("Raw_data/exclude_dataset", layout_exclude, fillvalue=-5)
         f1.create_dataset("Raw_data/datasets_dataset", compression="lzf", data=datasets_dtst)
-hd5py_dir = "/data/Freezing_samples/h5data_new/"
+        #img = f1["Raw_data/images_dataset"]
+        #features_2 = extract_haralick(img)
+        #f1.create_dataset("Raw_data/features2_dataset", compression="9", data=features_2)
+hd5py_dir = datadir
 #unite_datasets([hd5py_dir+'0_chunked_dataset_384bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_384water1freez31.hdf5'], hd5py_dir+'united_chunked_dataset_384freez31.hdf5', 'chunked')
 #unite_datasets([hd5py_dir+'0_chunked_dataset_96bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_96bact1freez31.hdf5', hd5py_dir+'2_chunked_dataset_96water2freez31.hdf5'], hd5py_dir+'united_chunked_dataset_96freez31.hdf5', 'chunked')
-unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31.hdf5'], hd5py_dir+'united_raw_dataset_384freez31.hdf5', 'raw')
-unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31.hdf5'], hd5py_dir+'united_raw_dataset_96freez31.hdf5', 'raw')
+unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_384freez31f2.hdf5', 'raw')
+unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31f2.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_96freez31f2.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_chunked_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384.hdf5', 'chunked')
 #unite_datasets(['/data/Freezing_samples/h5data/0_raw_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_raw_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384_test-raw.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5'], '/data/Freezing_samples/h5data/united_dat.hdf5', 'chunked')
