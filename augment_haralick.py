@@ -20,15 +20,15 @@ elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
 from supp_methods import extract_haralick, extract_haralick_parallel
 augmented_video_dir = datadir+"../aug/"
-np.random.seed(10)
-random.seed(10)
+#np.random.seed(10)
+#random.seed(10)
 # just for example
-ang_num =1
+ang_num =10
 
 start_ang =0#2
 angles = range(ang_num)#np.arange(start_ang,360,(360-start_ang)/ang_num)
 dataset_to_read = datadir+'0_raw_dataset_384bact0freez31.hdf5'
-dataset_to_write = datadir+'0_raw_dataset_384bact0freez31_aug.hdf5'
+dataset_to_write = datadir+'0_raw_dataset_384bact0freez31_aug1.hdf5'
 with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_to_write, "w", libver="latest") as f2:
     images_d = f1['Raw_data/images_dataset']
     labels_d = f1['Raw_data/labels_dataset']
@@ -46,7 +46,7 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
     rand_angles=start_ang+np.random.rand(ang_num,num_wells_orig)*(360-start_ang)
     labels_aug = np.empty((1,labels_d.shape[1], ang_num*labels_d.shape[2]))
     features_aug = np.empty((labels_d.shape[1],13,num_wells_orig*ang_num))
-    images_aug = np.uint8(np.empty((num_wells_orig*ang_num,images_d.shape[1],images_d.shape[2],labels_d.shape[1])))
+    images_aug = np.empty((num_wells_orig*ang_num,images_d.shape[1],images_d.shape[2],labels_d.shape[1]), dtype=np.uint8)
     excluded_aug = np.empty((1,num_wells_orig*ang_num))
     positions_aug = np.empty((2,num_wells_orig*ang_num))
     temps_aug = np.empty((num_wells_orig*ang_num, 1, labels_d.shape[1]))
@@ -119,7 +119,7 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
                 image_rotated[y:y + h, x:x + w] = rotated
                 imstack_rotated1[:,:,timepoint] = image_rotated
             mean = 0
-            var = 0#.1
+            var = 0.005
             sigma = var**0.5
             gauss = np.random.normal(mean,sigma,imstack_rotated1.shape)
             #noisy=imstack_rotated1 + gauss
@@ -179,6 +179,8 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
             labels_aug[0,:,aug_well]=labels_new
             
              #let us check the pictures (movie?)
+            
+            ### save the movies
             w,h,l=imstack_new.shape
             video_n = "well_{0}_ang{1}_{2:.1f}.avi".format(i,angle,cur_angle)
             #video_n = "well_"+str(i)+"ang"+str(angle)+".avi"
@@ -190,10 +192,10 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
                 video.write(imstack_new[:,:,k])
             video.release()
             cv2.destroyAllWindows()
-           
+           ### end save the movies
             aug_well+=1
     # now let us calculate the haralick parameters
-    features_aug = extract_haralick(images_aug)
+    features_aug = extract_haralick_parallel(images_aug)
     # and push them to the database
     f2.create_dataset("Raw_data/features2_dataset", compression=8, data=features_aug)
     f2.create_dataset("Raw_data/images_dataset", compression=8, data=images_aug)
