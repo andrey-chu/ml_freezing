@@ -316,4 +316,4 @@ def extract_haralick_parallel(images_d, cores_num):
     #import pdb; pdb.set_trace()
     for i in range(len(features)):
         features_array[i, :, :] =features[i].T
-    return features_array
+    return np.swapaxes(features_array, 0,2)

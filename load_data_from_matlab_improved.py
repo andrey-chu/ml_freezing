@@ -122,7 +122,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                     
                     iterator+=1
             features2 = extract_haralick_parallel(d_images, 7)
-            features2_reshaped = np.swapaxes(features2, 0,2)
+            #features2_reshaped = np.swapaxes(features2, 0,2)
             print("The shape of features2 is: {0}".format(features2_reshaped.shape))
             print("The shape of features is: {0}".format(features_dtst.shape))
             g1.create_dataset('features2_dataset', compression=7, data=features2_reshaped)
