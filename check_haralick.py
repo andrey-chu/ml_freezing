@@ -26,10 +26,10 @@ with h5py.File(dataset_to_read1, "r", libver="latest") as f1, h5py.File(dataset_
     print(features_d1.shape)
     length_feat = features_d1.shape[0]
     wells_num = features_d1.shape[2]
-    feature_num = 2
+    feature_num = 12
     
-    angle = 3
-    well = 247
+    angle = 0
+    well = 183
     before_rotation = features_d1[:,feature_num,well]
     after_rotation = features_d2[:,feature_num,well+angle*wells_num]
     print(features_d11.shape)

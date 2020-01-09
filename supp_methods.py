@@ -293,7 +293,7 @@ def extract_haralick(images_d):
             features[j,:,i]=np.mean(mt.features.haralick(image), axis=0)
     return features
 
-def extract_haralick_parallel(images_d, cores_num):
+def extract_haralick_parallel(images_d, cores_num=6):
     
     # the method gets the image database, reads it and outputs the features
     import mahotas as mt
