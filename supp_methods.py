@@ -223,35 +223,41 @@ def seg_find_freezing_by_frozen(predicted_array1):
     #import pdb; pdb.set_trace()
     ii = 0
     for i in range(len(predicted_array)):
+        # if i == 117:
+        #     import pdb; pdb.set_trace()
         length_array = predicted_array[i].shape[0]
         array_i=predicted_array[i]
         reversed_array = array_i[::-1]
-        if np.sum(array_i==1)==0:
-        # if there is no 1's in array
-            itera = 0
-            j = reversed_array[itera]
-            if np.sum(array_i==3)>0:
-                while (j!=3 and j!=2 and not(np.isnan(j))):# added j!= for those cases when 2's come after 3's
-                    itera +=1
-                    j=reversed_array[itera]
-            # let's go from the end
-            if np.sum(reversed_array==2)==0:
-                # if there are no 2's in aray 
-                # we go back until we encounter anything which is not 3 or nan
-                while (j==3 or (np.isnan(j))):
-                    itera +=1
-                    j=reversed_array[itera]
-            else:
-                # if there are 2's in array we go back until the first 2
-                while (j!=2):
-                    itera +=1
-                    j=reversed_array[itera]
-            #reversed_array[itera] =1
-            predicted_array[i][-itera] =1
-            freezing_points[0,ii] = length_array-itera
+        if np.unique(reversed_array).shape[0]==1:# if array has only one value
+            freezing_points[0,ii] =0
         else:
-            # if there are 1's than the first one is the freezing point
-            freezing_points[0,ii] = np.min(np.nonzero(array_i==1)[0])
+            
+            if np.sum(array_i==1)==0:
+            # if there is no 1's in array
+                itera = 0
+                j = reversed_array[itera]
+                if np.sum(array_i==3)>0:
+                    while (j!=3 and j!=2 and not(np.isnan(j))):# added j!= for those cases when 2's come after 3's
+                        itera +=1
+                        j=reversed_array[itera]
+                # let's go from the end
+                if np.sum(reversed_array==2)==0:
+                    # if there are no 2's in aray 
+                    # we go back until we encounter anything which is not 3 or nan
+                    while (j==3 or (np.isnan(j))):
+                        itera +=1
+                        j=reversed_array[itera]
+                else:
+                    # if there are 2's in array we go back until the first 2
+                    while (j!=2):
+                        itera +=1
+                        j=reversed_array[itera]
+                #reversed_array[itera] =1
+                predicted_array[i][-itera] =1
+                freezing_points[0,ii] = length_array-itera
+            else:
+                # if there are 1's than the first one is the freezing point
+                freezing_points[0,ii] = np.min(np.nonzero(array_i==1)[0])
         ii+=1
     return (freezing_points, predicted_array)
         

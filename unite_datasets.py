@@ -142,11 +142,12 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
 hd5py_dir = datadir
 #unite_datasets([hd5py_dir+'0_chunked_dataset_384bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_384water1freez31.hdf5'], hd5py_dir+'united_chunked_dataset_384freez31.hdf5', 'chunked')
 #unite_datasets([hd5py_dir+'0_chunked_dataset_96bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_96bact1freez31.hdf5', hd5py_dir+'2_chunked_dataset_96water2freez31.hdf5'], hd5py_dir+'united_chunked_dataset_96freez31.hdf5', 'chunked')
-unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_384freez31f2.hdf5', 'raw')
-unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31f2.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_96freez31f2.hdf5', 'raw')
+#unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_384freez31f2.hdf5', 'raw')
+#unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31f2.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_96freez31f2.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_chunked_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384.hdf5', 'chunked')
 #unite_datasets(['/data/Freezing_samples/h5data/0_raw_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_raw_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384_test-raw.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5'], '/data/Freezing_samples/h5data/united_dat.hdf5', 'chunked')
 
 # it would be better to rearrange the chunky version (or at least the 'heavy' databases of images and features)
 #into the form of all_chunks x [features] and [all_chunks x images] in this way we can read it gradually more easily from the database
+unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31_aug1.hdf5', hd5py_dir+'0_raw_dataset_384bact0freez31_aug2.hdf5'], hd5py_dir+'united_raw_dataset_384freez31f2_aug.hdf5', 'raw')
