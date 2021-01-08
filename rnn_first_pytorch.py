@@ -88,7 +88,7 @@ with h5py.File(raw_united_dataset, 'r') as f:
     
     
 
-    input_seq = torch.from_numpy(d_features2[:])
+    input_seq = torch.from_numpy(np.swapaxes(np.swapaxes(d_features2[:], 1, 2), 0, 1))
     target_seq = torch.Tensor(d_labels[:])
 
 
