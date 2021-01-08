@@ -18,17 +18,19 @@ if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
 elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
+elif platform.node()=='andrey-workbook':
+    from branch_init_laptop import datadir     
 from supp_methods import extract_haralick, extract_haralick_parallel
 augmented_video_dir = datadir+"../aug/"
 #np.random.seed(10)
 #random.seed(10)
 # just for example
-ang_num =10
+ang_num =1
 
 start_ang =0#2
 angles = range(ang_num)#np.arange(start_ang,360,(360-start_ang)/ang_num)
-dataset_to_read = datadir+'0_raw_dataset_384bact0freez31.hdf5'
-dataset_to_write = datadir+'0_raw_dataset_384bact0freez31_aug1.hdf5'
+dataset_to_read = datadir+'0_raw_dataset_384bact0freez31f2.hdf5'
+dataset_to_write = datadir+'0_raw_dataset_384bact0freez31e2_aug1.hdf5'
 with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_to_write, "w", libver="latest") as f2:
     images_d = f1['Raw_data/images_dataset']
     labels_d = f1['Raw_data/labels_dataset']
@@ -74,15 +76,15 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
             im_shape = images_d.shape
             
             # Save the video of original well
-            # w,h,l=imstack.shape
-            # video_n = str(i)+"orig.avi"
-            # video_name = augmented_video_dir+video_n
-            # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            # video=cv2.VideoWriter(video_name, fourcc, 40, (w,h),isColor=False)
-            # for k in range(l):
-            #     video.write(imstack[:,:,k])
-            # video.release()
-            # cv2.destroyAllWindows()
+            w,h,l=imstack.shape
+            video_n = str(i)+"orig.avi"
+            video_name = augmented_video_dir+video_n
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            video=cv2.VideoWriter(video_name, fourcc, 40, (w,h),isColor=False)
+            for k in range(l):
+                video.write(imstack[:,:,k])
+            video.release()
+            cv2.destroyAllWindows()
             
             
             

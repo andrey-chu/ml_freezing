@@ -11,17 +11,19 @@ if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
 elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
+elif platform.node()=='andrey-workbook':
+    from branch_init_laptop import datadir    
     
 data_384_dirlist = [datadir+'../Test384Bakterie_1/',datadir+'../Test384Vand_1/']
-data_96_dirlist = [datadir+'../Test96Bakterie_1/', datadir+'../Test96Bakterie_2/', datadir+'../Test96Vand_1/']
+#data_96_dirlist = [datadir+'../Test96Bakterie_1/', datadir+'../Test96Bakterie_2/', datadir+'../Test96Vand_1/']
 h5data_location384 = datadir
-h5data_location96 = datadir
+#h5data_location96 = datadir
 substances384 = ['bact', 'water']
-substances96 = ['bact', 'bact', 'water']
+#substances96 = ['bact', 'bact', 'water']
 wellsize384 = [52, 52]
-wellsize96 = [106, 106]
+#wellsize96 = [106, 106]
 numwells384 = 384
-numwells96 = 96
+#numwells96 = 96
 """
 This function goes through the directories. It assumes that 
 wells: the wells pictures directory
@@ -52,7 +54,7 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
          #temperatures = np.reshape(temperatures, (1, len(temps)))
          well_rows = freeze_nums.shape[0]
          well_columns = freeze_nums.shape[1]
-         stupid_algo_results = spio.loadmat(dirlist[i]+'stupid_algo_mat.mat')
+         #stupid_algo_results = spio.loadmat(dirlist[i]+'stupid_algo_mat.mat')
          # since h5py now has this fantastic option of virtual datasets what we
          # are going to do is to create a dataset for each sample and then unite
          # them in a virtual dataset
@@ -112,17 +114,17 @@ def load_raw_matlab_data_improved(dirlist, h5data_location, wellsize, numwells, 
                         d_labels[0,:,iterator] = labels
                         features = well_read["features_vec"]
                         d_features[:,:,iterator] = features
-                        d_matlab[0,:,iterator] = np.zeros((1,numpoints))
-                        st_alg_fr_point = min(stupid_algo_results["after_thresh"][j,k]-1,numpoints-1)
-                        st_alg_start_freezing = max(stupid_algo_results["after_thresh"][j,k]-freezing_length,0)
-                        if (stupid_algo_results["after_thresh"][j,k]-freezing_length<0)|(stupid_algo_results["after_thresh"][j,k]-1>numpoints-1):
-                            print('Warning: matlab algorithm gives wrong numbers')
-                        d_matlab[0,st_alg_fr_point,iterator] = 1
-                        d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
+                        # d_matlab[0,:,iterator] = np.zeros((1,numpoints))
+                        # st_alg_fr_point = min(stupid_algo_results["after_thresh"][j,k]-1,numpoints-1)
+                        # st_alg_start_freezing = max(stupid_algo_results["after_thresh"][j,k]-freezing_length,0)
+                        # if (stupid_algo_results["after_thresh"][j,k]-freezing_length<0)|(stupid_algo_results["after_thresh"][j,k]-1>numpoints-1):
+                        #     print('Warning: matlab algorithm gives wrong numbers')
+                        # d_matlab[0,st_alg_fr_point,iterator] = 1
+                        # d_matlab[0,st_alg_start_freezing:st_alg_fr_point,iterator] = 2
                     
                     iterator+=1
             features2 = extract_haralick_parallel(d_images, 7)
-            #features2_reshaped = np.swapaxes(features2, 0,2)
+            features2_reshaped = np.swapaxes(features2, 0,2)
             print("The shape of features2 is: {0}".format(features2_reshaped.shape))
             print("The shape of features is: {0}".format(features_dtst.shape))
             g1.create_dataset('features2_dataset', compression=7, data=features2_reshaped)
@@ -147,7 +149,7 @@ def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwel
          #temperatures = np.reshape(temperatures, (1, len(temps)))
          well_rows = freeze_nums.shape[0]
          well_columns = freeze_nums.shape[1]
-         stupid_algo_results = spio.loadmat(dirlist[i]+'stupid_algo_mat.mat')
+         #stupid_algo_results = spio.loadmat(dirlist[i]+'stupid_algo_mat.mat')
          # since h5py now has this fantastic option of virtual datasets what we
          # are going to do is to create a dataset for each sample and then unite
          # them in a virtual dataset
@@ -172,7 +174,7 @@ def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwel
             g1.create_dataset('temperatures_dataset', compression="lzf", data=new_temperatures)
             d_labels = g1.create_dataset('labels_dataset', compression="lzf", data=labels_dtst)
             d_features = g1.create_dataset('features_dataset', compression="lzf", data=features_dtst)
-            d_matlab = g1.create_dataset('matlab_dataset', compression="lzf", data=matlab_dtst)
+#            d_matlab = g1.create_dataset('matlab_dataset', compression="lzf", data=matlab_dtst)
             d_substance = g1.create_dataset('substance_dataset', compression="lzf", data=substance_dtst)
             d_exclude = g1.create_dataset('exclude_dataset', compression="lzf", data=exclude_dtst)
             g1.attrs['Comments']=comments_dtst
@@ -213,17 +215,17 @@ def load_chunked_matlab_data_improved(dirlist, h5data_location, wellsize, numwel
                             temp =features_temp[ii:ii+chunklength,:]
                             features_chunked[ii,:,:] = temp.T # check the axis
                         d_features[:,:,:,iterator] = features_chunked
-                        d_matlab[0,:,iterator] = np.zeros((1,numpoints_new))
-                        st_alg_fr_point = min(stupid_algo_results["after_thresh"][j,k]-1,numpoints-1)
-                        st_alg_start_freezing = max(stupid_algo_results["after_thresh"][j,k]-freezing_length,0)
-                        new_fp_st_alg = st_alg_fr_point-chunklength #<--
-                        new_st_f_st_alg = st_alg_start_freezing-chunklength
+ #                       d_matlab[0,:,iterator] = np.zeros((1,numpoints_new))
+          #              st_alg_fr_point = min(stupid_algo_results["after_thresh"][j,k]-1,numpoints-1)
+           #             st_alg_start_freezing = max(stupid_algo_results["after_thresh"][j,k]-freezing_length,0)
+            #            new_fp_st_alg = st_alg_fr_point-chunklength #<--
+             #           new_st_f_st_alg = st_alg_start_freezing-chunklength
                         
-                        if (stupid_algo_results["after_thresh"][j,k]-freezing_length<0)|(stupid_algo_results["after_thresh"][j,k]-1>numpoints-1):
-                            print('Warning: matlab algorithm gives wrong numbers')
-                        d_matlab[0,new_fp_st_alg,iterator] = 1
-                        d_matlab[0,new_st_f_st_alg:new_fp_st_alg,iterator] = 2
-                        d_matlab[0,new_fp_st_alg+1:,iterator] = 3
+              #          if (stupid_algo_results["after_thresh"][j,k]-freezing_length<0)|(stupid_algo_results["after_thresh"][j,k]-1>numpoints-1):
+               #             print('Warning: matlab algorithm gives wrong numbers')
+                #        d_matlab[0,new_fp_st_alg,iterator] = 1
+                 #       d_matlab[0,new_st_f_st_alg:new_fp_st_alg,iterator] = 2
+                  #      d_matlab[0,new_fp_st_alg+1:,iterator] = 3
                     
                     iterator+=1
     
@@ -238,7 +240,7 @@ def encode_substances(substance):
     
 # Start from 384
 load_raw_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 31)
-load_raw_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 31)
+#load_raw_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 31)
 #load_chunked_matlab_data_improved(data_384_dirlist, h5data_location384, wellsize384, numwells384, substances384, 6, 31)
 #load_chunked_matlab_data_improved(data_96_dirlist, h5data_location96, wellsize96, numwells96, substances96, 6, 31)
 

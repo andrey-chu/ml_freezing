@@ -13,6 +13,8 @@ if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
 elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
+elif platform.node()=='andrey-workbook':
+    from branch_init_laptop import datadir 
 
 def unite_datasets(list_to_unite, united_name, raw_chunked):
     if raw_chunked == 'raw':
@@ -142,8 +144,8 @@ def unite_datasets(list_to_unite, united_name, raw_chunked):
 hd5py_dir = datadir
 #unite_datasets([hd5py_dir+'0_chunked_dataset_384bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_384water1freez31.hdf5'], hd5py_dir+'united_chunked_dataset_384freez31.hdf5', 'chunked')
 #unite_datasets([hd5py_dir+'0_chunked_dataset_96bact0freez31.hdf5', hd5py_dir+'1_chunked_dataset_96bact1freez31.hdf5', hd5py_dir+'2_chunked_dataset_96water2freez31.hdf5'], hd5py_dir+'united_chunked_dataset_96freez31.hdf5', 'chunked')
-unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_384freez31f2.hdf5', 'raw')
-unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31f2.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_96freez31f2.hdf5', 'raw')
+unite_datasets([hd5py_dir+'0_raw_dataset_384bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_384water1freez31f2.hdf5', hd5py_dir+'0_raw_dataset_384bact0freez31e2_aug1.hdf5'], hd5py_dir+'united_raw_dataset_384freez31f2_w_aug.hdf5', 'raw')
+#unite_datasets([hd5py_dir+'0_raw_dataset_96bact0freez31f2.hdf5', hd5py_dir+'1_raw_dataset_96bact1freez31f2.hdf5', hd5py_dir+'2_raw_dataset_96water2freez31f2.hdf5'], hd5py_dir+'united_raw_dataset_96freez31f2.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_chunked_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384.hdf5', 'chunked')
 #unite_datasets(['/data/Freezing_samples/h5data/0_raw_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/1_raw_dataset_384water1.hdf5'], '/data/Freezing_samples/h5data/united_dat_384_test-raw.hdf5', 'raw')
 #unite_datasets(['/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5','/data/Freezing_samples/h5data/0_chunked_dataset_384bact0.hdf5'], '/data/Freezing_samples/h5data/united_dat.hdf5', 'chunked')

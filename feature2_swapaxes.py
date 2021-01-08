@@ -11,7 +11,8 @@ if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
 elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
-
+elif platform.node()=='andrey-workbook':
+    from branch_init_laptop import datadir
 
 def swapaxes_feature2(to_load):
     import h5py
@@ -25,8 +26,8 @@ def swapaxes_feature2(to_load):
          print(feat2_new.shape)
          print(feat1.shape)
 
-swapaxes_feature2(datadir+'0_raw_dataset_384bact0freez31f2.hdf5')
+#swapaxes_feature2(datadir+'0_raw_dataset_384bact0freez31f2.hdf5')
 swapaxes_feature2(datadir+'1_raw_dataset_384water1freez31f2.hdf5')
-swapaxes_feature2(datadir+'0_raw_dataset_96bact0freez31f2.hdf5')
-swapaxes_feature2(datadir+'1_raw_dataset_96bact1freez31f2.hdf5')
-swapaxes_feature2(datadir+'2_raw_dataset_96water2freez31f2.hdf5')
+# swapaxes_feature2(datadir+'0_raw_dataset_96bact0freez31f2.hdf5')
+# swapaxes_feature2(datadir+'1_raw_dataset_96bact1freez31f2.hdf5')
+# swapaxes_feature2(datadir+'2_raw_dataset_96water2freez31f2.hdf5')

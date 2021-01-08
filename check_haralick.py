@@ -15,9 +15,11 @@ if platform.node()=='choo-desktop':
     from branch_init_choo import datadir
 elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
-
+elif platform.node()=='andrey-workbook':
+    from branch_init_laptop import datadir
+    
 dataset_to_read1 = datadir+'0_raw_dataset_384bact0freez31f2.hdf5'
-dataset_to_read2 = datadir+'0_raw_dataset_384bact0freez31_aug.hdf5'
+dataset_to_read2 = datadir+'0_raw_dataset_384bact0freez31e2_aug1.hdf5'
 dataset_to_read3 = datadir+'united_raw_dataset_384freez31f2.hdf5'
 with h5py.File(dataset_to_read1, "r", libver="latest") as f1, h5py.File(dataset_to_read2, "r", libver="latest") as f2:
     features_d1 = f1['Raw_data/features2_dataset']
@@ -26,7 +28,7 @@ with h5py.File(dataset_to_read1, "r", libver="latest") as f1, h5py.File(dataset_
     print(features_d1.shape)
     length_feat = features_d1.shape[0]
     wells_num = features_d1.shape[2]
-    feature_num = 12
+    feature_num = 5
     
     angle = 0
     well = 183
