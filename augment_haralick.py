@@ -23,12 +23,12 @@ augmented_video_dir = datadir+"../aug/"
 #np.random.seed(10)
 #random.seed(10)
 # just for example
-ang_num =10
+ang_num =4
 
 start_ang =0#2
 angles = range(ang_num)#np.arange(start_ang,360,(360-start_ang)/ang_num)
-dataset_to_read = datadir+'0_raw_dataset_384bact0freez31.hdf5'
-dataset_to_write = datadir+'0_raw_dataset_384bact0freez31_aug1.hdf5'
+dataset_to_read = datadir+'1_raw_dataset_384water1freez31f2.hdf5'
+dataset_to_write = datadir+'1_raw_dataset_384water1freez31f2_aug2.hdf5'
 with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_to_write, "w", libver="latest") as f2:
     images_d = f1['Raw_data/images_dataset']
     labels_d = f1['Raw_data/labels_dataset']
@@ -44,13 +44,13 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
     # import pdb; pdb.set_trace()
     num_wells_orig = images_d.shape[0]
     rand_angles=start_ang+np.random.rand(ang_num,num_wells_orig)*(360-start_ang)
-    labels_aug = np.empty((1,labels_d.shape[1], ang_num*labels_d.shape[2]))
+    labels_aug = np.empty((labels_d.shape[1], ang_num*labels_d.shape[2]), dtype=np.uint8)
     features_aug = np.empty((labels_d.shape[1],13,num_wells_orig*ang_num))
     images_aug = np.empty((num_wells_orig*ang_num,images_d.shape[1],images_d.shape[2],labels_d.shape[1]), dtype=np.uint8)
-    excluded_aug = np.empty((1,num_wells_orig*ang_num))
+    excluded_aug = np.empty((1,num_wells_orig*ang_num), dtype=np.bool_)
     positions_aug = np.empty((2,num_wells_orig*ang_num))
     temps_aug = np.empty((num_wells_orig*ang_num, 1, labels_d.shape[1]))
-    substance_aug = np.empty((1,num_wells_orig*ang_num))
+    substance_aug = np.empty((1,num_wells_orig*ang_num), dtype=np.uint8)
     aug_well = 0
 
     for angle in angles:
@@ -142,7 +142,7 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
             # if negative we will multiply the last one
             # we will update the labels
             rand_width = 40
-            # import pdb; pdb.set_trace()
+            
             rand_shift=np.int8(random.uniform(-rand_width, rand_width))
             while fps[i]+rand_shift<0 and fps[i]+rand_shift>length_im:
                 rand_shift=np.int8(random.uniform(-rand_width, rand_width))
@@ -169,14 +169,14 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
                 imstack_shifted = imstack_rotated
             
             
-            
+            # import pdb; pdb.set_trace()
             labels_new=labels_shifted[:,:labels.shape[0]]
 
             imstack_new =imstack_shifted[:,:,:labels.shape[0]]
             noisy=imstack_new+gauss
  
             images_aug[aug_well,:,:,:]=noisy
-            labels_aug[0,:,aug_well]=labels_new
+            labels_aug[:,aug_well]=labels_new
             
              #let us check the pictures (movie?)
             
