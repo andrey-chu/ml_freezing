@@ -10,8 +10,12 @@ import numpy as np
 import h5py
 
 
+
 import torch
-from torch import nn
+import torch.nn as nn
+from torch.autograd import Variable
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, TensorDataset
 """
 Let us load the data first
 We  need the raw features and the output
@@ -22,7 +26,6 @@ elif platform.node()=='andrey-cfin':
     from branch_init_cfin import datadir
 elif platform.node()=='andrey-workbook':
     from branch_init_laptop import datadir
-
 
 
 
@@ -38,9 +41,9 @@ else:
     device = torch.device("cpu")
     print("GPU not available, CPU used")
 
-class Model(nn.Module):
+class FirstSimpleModel(nn.Module):
     def __init__(self, input_size, output_size, hidden_dim, n_layers):
-        super(Model, self).__init__()
+        super(FirstSimpleModel, self).__init__()
 
         # Defining some parameters
         self.hidden_dim = hidden_dim
@@ -48,8 +51,8 @@ class Model(nn.Module):
 
         #Defining the layers
         # RNN Layer
-        self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True)   
-        # Fully connected layer
+        self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True, nonlinearity='relu')  # to make it relu one should add nonelinearity='relu' 
+        # Fully connected layer # If I understand correctly this is the layer that sits on top of RNN
         self.fc = nn.Linear(hidden_dim, output_size)
     
     def forward(self, x):
@@ -74,8 +77,13 @@ class Model(nn.Module):
          # We'll send the tensor holding the hidden state to the device we specified earlier as well
         return hidden
 
+    # first let us manipulate the datasets to extract the training data
+    # and the testing data and put it in two separate datasets training dataset and 
+    # testing dataset
+#       divide_into_training_testing(input_dataset, fields_list, output dataset)
 
-raw_united_dataset = datadir + 'united_raw_dataset_384freez31f2_w_aug.hdf5'
+#raw_united_dataset = datadir + 'united_raw_dataset_384freez31f2_w_aug.hdf5'
+raw_united_dataset = datadir + 'united_raw_dataset_384freez31f2_aug.hdf5'
 with h5py.File(raw_united_dataset, 'r') as f:
     d_images = f["Raw_data/images_dataset"]
     d_labels = f["Raw_data/labels_dataset"]
@@ -86,21 +94,20 @@ with h5py.File(raw_united_dataset, 'r') as f:
     d_shapes=f["Raw_data/shapes_dataset"]
     
     
-    
 
     input_seq = torch.from_numpy(np.swapaxes(np.swapaxes(d_features2[:], 1, 2), 0, 1))
-    target_seq = torch.Tensor(d_labels[:])
+    target_seq = torch.Tensor(np.swapaxes(d_labels[:], 0, 1))
 
 
     
     # Instantiate the model with hyperparameters
-    model = Model(input_size=13, output_size=1, hidden_dim=12, n_layers=1)
+    model = FirstSimpleModel(input_size=13, output_size=4, hidden_dim=5, n_layers=1)
     # We'll also set the model to the device that we defined earlier (default is CPU)
     model = model.to(device)
     
     # Define hyperparameters
-    n_epochs = 100
-    lr=0.01
+    n_epochs = 1000
+    lr=0.001
     
     # Define Loss, Optimizer
     criterion = nn.CrossEntropyLoss()
@@ -113,7 +120,8 @@ with h5py.File(raw_united_dataset, 'r') as f:
         output, hidden = model(input_seq)
         output = output.to(device)
         target_seq = target_seq.to(device)
-        loss = criterion(output, target_seq.view(-1).long())
+    
+        loss = criterion(output, target_seq.reshape(-1).long())
         loss.backward() # Does backpropagation and calculates gradients
         optimizer.step() # Updates the weights accordingly
         
