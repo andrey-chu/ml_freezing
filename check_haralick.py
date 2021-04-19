@@ -19,8 +19,10 @@ elif platform.node()=='andrey-cfin':
 elif platform.node()=='andrey-workbook':
     from branch_init_laptop import datadir
     
-dataset_to_read1 = datadir+'1_raw_dataset_384water1freez31f2.hdf5'
-dataset_to_read2 = datadir+'1_raw_dataset_384water1freez31f2_aug1.hdf5'
+#dataset_to_read1 = datadir+'1_raw_dataset_384water1freez31f2.hdf5'
+#dataset_to_read2 = datadir+'1_raw_dataset_384water1freez31f2_aug1.hdf5'
+dataset_to_read1 = datadir+'0_raw_dataset_384bact0freez31f2.hdf5'
+dataset_to_read2 = datadir+'0_raw_dataset_384bact0freez31_aug.hdf5'
 dataset_to_read3 = datadir+'united_raw_dataset_384freez31f2.hdf5'
 with h5py.File(dataset_to_read1, "r", libver="latest") as f1, h5py.File(dataset_to_read2, "r", libver="latest") as f2:
     features_d1 = f1['Raw_data/features2_dataset']

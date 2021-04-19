@@ -25,12 +25,13 @@ augmented_video_dir = datadir+"../aug/"
 #np.random.seed(10)
 #random.seed(10)
 # just for example
-ang_num =10
-
+ang_num =50
+save_the_movies = False
 start_ang =0#2
 angles = range(ang_num)#np.arange(start_ang,360,(360-start_ang)/ang_num)
 dataset_to_read = datadir+'0_raw_dataset_384bact0freez31.hdf5'
-dataset_to_write = datadir+'0_raw_dataset_384bact0freez31_aug1.hdf5'
+#dataset_to_read = datadir+'united_raw_dataset_384freez31f2.hdf5'
+dataset_to_write = datadir+'raw_bact384_aug0.hdf5'
 with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_to_write, "w", libver="latest") as f2:
     images_d = f1['Raw_data/images_dataset']
     labels_d = f1['Raw_data/labels_dataset']
@@ -182,31 +183,37 @@ with h5py.File(dataset_to_read, "r", libver="latest") as f1, h5py.File(dataset_t
             
              #let us check the pictures (movie?)
             
-            ### save the movies
-            w,h,l=imstack_new.shape
-            video_n = "well_{0}_ang{1}_{2:.1f}.avi".format(i,angle,cur_angle)
-            #video_n = "well_"+str(i)+"ang"+str(angle)+".avi"
-            video_name = augmented_video_dir+video_n
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            video=cv2.VideoWriter(video_name, fourcc, 40, (w,h),isColor=False)
-            #import pdb; pdb.set_trace()
-            for k in range(l):
-                video.write(imstack_new[:,:,k])
-            video.release()
-            cv2.destroyAllWindows()
-           ### end save the movies
+
+            if save_the_movies:
+                ### save the movies
+                w,h,l=imstack_new.shape
+                video_n = "well_{0}_ang{1}_{2:.1f}.avi".format(i,angle,cur_angle)
+                #video_n = "well_"+str(i)+"ang"+str(angle)+".avi"
+                video_name = augmented_video_dir+video_n
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                video=cv2.VideoWriter(video_name, fourcc, 40, (w,h),isColor=False)
+                #import pdb; pdb.set_trace()
+                for k in range(l):
+                    video.write(imstack_new[:,:,k])
+                video.release()
+                cv2.destroyAllWindows()
+               ### end save the movies
             aug_well+=1
-    # now let us calculate the haralick parameters
-    features_aug = extract_haralick_parallel(images_aug)
+
     # and push them to the database
-    f2.create_dataset("Raw_data/features2_dataset", compression=8, data=features_aug)
-    f2.create_dataset("Raw_data/images_dataset", compression=8, data=images_aug)
+    
+    
     f2.create_dataset("Raw_data/labels_dataset", compression=8, data=labels_aug)
-    f2.create_dataset("Raw_data/exclude_dataset", compression=8, data=excluded_aug)
+    
     f2.create_dataset("Raw_data/features_dataset", compression=8, data=features_aug)
     f2.create_dataset("Raw_data/matlab_dataset", compression=8, data=labels_aug)
     f2.create_dataset("Raw_data/position_dataset", compression=8, data=positions_aug)
     f2.create_dataset("Raw_data/substance_dataset", compression=8, data=substance_aug)
     f2.create_dataset("Raw_data/temperatures_dataset", compression=8, data=temps_aug)
-    
+    del labels_aug, features_aug, positions_aug, substance_aug, temps_aug
+    # now let us calculate the haralick parameters
+    features_aug = extract_haralick_parallel(images_aug)
+    f2.create_dataset("Raw_data/exclude_dataset", compression=8, data=excluded_aug)
+    f2.create_dataset("Raw_data/features2_dataset", compression=8, data=features_aug)
+    f2.create_dataset("Raw_data/images_dataset", compression=8, data=images_aug)
     None

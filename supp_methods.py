@@ -317,3 +317,38 @@ def extract_haralick_parallel(images_d, cores_num=6):
     for i in range(len(features)):
         features_array[i, :, :] =features[i].T
     return np.swapaxes(features_array, 0,2)
+# def divide_training_testing(big_united_dataset, fields_list, output_datset):
+#     """
+#     The function divides the data into test and train datasets
+#     The cross-validation will be performed on test datset with augmented data
+#     that is separated using stratified k-folds https://www.analyticsvidhya.com/blog/2018/05/improve-model-performance-cross-validation-in-python-r/
+#     https://machinelearningmastery.com/k-fold-cross-validation/
+
+
+#     Parameters
+#     ----------
+#     big_united_dataset : H5PY dataset
+#     fields_list: tuple of fields to be divided
+#     output dataset: size 2 tuple of dataset names to write the data to
+#                     first train 
+#                     second test
+#     train_share: a share of train data (test data is 1-train_share)
+        
+
+#     Returns
+#     -------
+#     0 if successfull
+
+#     """
+#     import h5py
+#     from sklearn.model_selection import train_test_split
+#     with h5py.File(big_united_dataset, 'r') as f:
+#         num_to_divide=len(fields_list)
+#         chosen={num_to_divide}
+#         for i in num_to_divide:
+#             chosen[i] = f[fields_list[i]]
+            
+#     features_train, features_test, targets_train, targets_test = train_test_split(features_numpy,
+#                                                                              targets_numpy,
+#                                                                              test_size = 0.2,
+#                                                                              random_state = 42) 
